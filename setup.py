@@ -12,6 +12,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
-    install_requires=[],
+    install_requires=[
+        'colored',
+    ],
     packages=find_packages(exclude=('tests*', 'testing*')),
 )
