@@ -1,0 +1,4 @@
+coverage
+pkg-release
+pre-commit>=0.15
+pytest
