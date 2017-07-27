@@ -14,9 +14,15 @@ class MissingStateTransition(Exception):
     pass
 
 
+class DuplicateStateTransitionException(Exception):
+    pass
+
+
 class TuringMachine(object):
 
     def __init__(self, state_transitions, debug=False):
+        validate_state_transitions(state_transitions)
+
         self._state_transitions = state_transitions
         self._state_transition_mapping = {
             (state.previous_state, state.previous_character): state
@@ -100,7 +106,6 @@ class TuringMachine(object):
             )
         ))
 
-
     def print_tape(self):
         tape = ''
         for i, character in enumerate(self._tape):
@@ -115,3 +120,16 @@ class TuringMachine(object):
         print(tape)
         print('State: {}'.format(self._current_state))
         print()  # Add empty line
+
+
+def validate_state_transitions(state_transitions):
+    seen = set()
+
+    for transition in state_transitions:
+        transition.validate()
+
+        key = (transition.previous_state, transition.previous_character)
+        if key in seen:
+            raise DuplicateStateTransitionException(key)
+        else:
+            seen.add(key)
