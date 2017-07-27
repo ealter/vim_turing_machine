@@ -17,6 +17,10 @@ class DuplicateStateTransitionException(Exception):
     pass
 
 
+class TooManyStepsException(Exception):
+    pass
+
+
 class TuringMachine(object):
 
     def __init__(self, state_transitions, debug=False):
@@ -78,15 +82,21 @@ class TuringMachine(object):
         self.print_tape()
         raise StopIteration
 
-    def run(self, initial_tape):
+    def run(self, initial_tape, max_steps=None):
         self.initialize_machine(initial_tape)
 
         if self._debug:
             self.print_tape()
 
+        num_steps = 0
+
         try:
             while(True):
                 self.step()
+                num_steps += 1
+
+                if max_steps is not None and num_steps >= max_steps:
+                    raise TooManyStepsException
         except StopIteration:
             pass
 
