@@ -36,10 +36,6 @@
     hooks:
     -   id: reorder-python-imports
         language_version: python3.6
-        args: [
-            '--add-import', 'from __future__ import absolute_import',
-            '--add-import', 'from __future__ import unicode_literals',
-        ]
 -   repo: git@git.yelpcorp.com:mirrors/asottile/pyupgrade
     sha: v1.1.2-1
     hooks:
