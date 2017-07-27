@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import colored
 
 from vim_turing_machine.constants import BLANK_CHARACTER

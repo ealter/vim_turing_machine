@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 BLANK_CHARACTER = ' '
 INITIAL_STATE = 'initial_state'
 # If we do not define a state for the character in question, we can use the

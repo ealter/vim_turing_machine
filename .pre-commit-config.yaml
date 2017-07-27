@@ -29,8 +29,6 @@
         exclude: ^\.activate\.sh$
     -   id: check-byte-order-marker
         language_version: python3.6
-    -   id: fix-encoding-pragma
-        language_version: python3.6
 -   repo: git@git.yelpcorp.com:mirrors/asottile/reorder_python_imports
     sha: v0.3.5
     hooks:

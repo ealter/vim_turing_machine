@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from vim_turing_machine import example
 
 
