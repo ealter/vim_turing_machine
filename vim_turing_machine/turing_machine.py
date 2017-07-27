@@ -3,6 +3,7 @@ import colored
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import FINAL_STATES
 from vim_turing_machine.constants import INITIAL_STATE
+from vim_turing_machine.constants import VIM_TEMPLATE
 
 
 class NegativeTapePositionException(Exception):
@@ -83,6 +84,22 @@ class TuringMachine(object):
                 self.step()
         except StopIteration:
             pass
+
+    def to_vim(self, initial_tape=None):
+        if initial_tape is not None:
+            self.initialize_machine(initial_tape)
+
+        print(VIM_TEMPLATE.format(
+            state_transitions='\n'.join(
+                ['_s:  # State transitions'] +
+                [
+                    state_transition.to_vim()
+                    for state_transition in self._state_transitions
+                ] +
+                ['# End State transitions']
+            )
+        ))
+
 
     def print_tape(self):
         tape = ''
