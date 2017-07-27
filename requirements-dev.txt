@@ -1,4 +1,5 @@
 coverage
+flake8
 pkg-release
 pre-commit>=0.15
 pytest
