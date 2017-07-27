@@ -3,7 +3,6 @@ import sys
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import NO_FINAL_STATE
-from vim_turing_machine.constants import WILDCARD_CHARACTER
 from vim_turing_machine.constants import YES_FINAL_STATE
 from vim_turing_machine.struct import BACKWARDS
 from vim_turing_machine.struct import FORWARDS
@@ -28,8 +27,15 @@ number_is_even_state_transitions = (
     # But any other number initially means that we should go find the end of the array
     StateTransition(
         previous_state=INITIAL_STATE,
-        previous_character=WILDCARD_CHARACTER,
-        next_character=WILDCARD_CHARACTER,
+        previous_character='0',
+        next_character='0',
+        next_state=ADVANCE_TO_END_OF_NUMBER,
+        tape_pointer_direction=FORWARDS,
+    ),
+    StateTransition(
+        previous_state=INITIAL_STATE,
+        previous_character='1',
+        next_character='1',
         next_state=ADVANCE_TO_END_OF_NUMBER,
         tape_pointer_direction=FORWARDS,
     ),
@@ -37,8 +43,15 @@ number_is_even_state_transitions = (
     # Once we're looking for the end of the number, go until we hit a blank
     StateTransition(
         previous_state=ADVANCE_TO_END_OF_NUMBER,
-        previous_character=WILDCARD_CHARACTER,
-        next_character=WILDCARD_CHARACTER,
+        previous_character='0',
+        next_character='0',
+        next_state=ADVANCE_TO_END_OF_NUMBER,
+        tape_pointer_direction=FORWARDS,
+    ),
+    StateTransition(
+        previous_state=ADVANCE_TO_END_OF_NUMBER,
+        previous_character='1',
+        next_character='1',
         next_state=ADVANCE_TO_END_OF_NUMBER,
         tape_pointer_direction=FORWARDS,
     ),

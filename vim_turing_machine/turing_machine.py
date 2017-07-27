@@ -3,7 +3,6 @@ import colored
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import FINAL_STATES
 from vim_turing_machine.constants import INITIAL_STATE
-from vim_turing_machine.constants import WILDCARD_CHARACTER
 
 
 class NegativeTapePositionException(Exception):
@@ -36,23 +35,16 @@ class TuringMachine(object):
                 (self._current_state, self._tape[self._cursor_position])
             ]
         except KeyError:
-            try:
-                return self._state_transition_mapping[
-                    (self._current_state, WILDCARD_CHARACTER)
-                ]
-            except KeyError:
-                raise MissingStateTransition(
-                    (self._current_state, self._tape[self._cursor_position])
-                )
+            raise MissingStateTransition(
+                (self._current_state, self._tape[self._cursor_position])
+            )
 
     def step(self):
         """This implements an infinitely long tape in the right direction, but
         will error if you go beyond position 0"""
         transition = self.get_state_transition()
 
-        if transition.next_character != WILDCARD_CHARACTER:
-            # A wildcard character should mean 'do not replace the current character'
-            self._tape[self._cursor_position] = transition.next_character
+        self._tape[self._cursor_position] = transition.next_character
 
         self._cursor_position += transition.tape_pointer_direction
 
