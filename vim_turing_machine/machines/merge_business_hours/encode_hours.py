@@ -4,14 +4,17 @@ from stdin and outputs the initial tape."""
 import json
 import sys
 
+from vim_turing_machine.constants import BLANK_CHARACTER
+from vim_turing_machine.machines.merge_business_hours.merge_business_hours import BITS_PER_NUMBER
 
-def encode_hours(hours, num_bits=5):
+
+def encode_hours(hours, num_bits=BITS_PER_NUMBER):
     result = ''
     for (begin, end) in hours:
         result += encode_in_x_bits(begin, num_bits)
         result += encode_in_x_bits(end, num_bits)
 
-    return result
+    return BLANK_CHARACTER + result
 
 
 def encode_in_x_bits(number, num_bits):
@@ -23,4 +26,4 @@ def encode_in_x_bits(number, num_bits):
 
 
 if __name__ == '__main__':
-    print(encode_hours(json.loads(sys.stdin)))
+    print(encode_hours(json.load(sys.stdin)))

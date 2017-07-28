@@ -146,8 +146,8 @@ def merge_business_hours_transitions():
     transitions.extend(
         compare_two_sequential_numbers(
             initial_state=COMPARE_CLOSING_HOUR,
-            greater_than_or_equal_to_state=CLOSING_HOUR_IS_LARGER,
-            less_than_state=CLOSING_HOUR_IS_NOT_LARGER,
+            less_than_state=CLOSING_HOUR_IS_LARGER,
+            greater_than_or_equal_to_state=CLOSING_HOUR_IS_NOT_LARGER,
         )
     )
 
@@ -642,4 +642,4 @@ def check_if_there_is_any_input_left(initial_state, final_state):
 
 if __name__ == '__main__':
     merge_business_hours = TuringMachine(merge_business_hours_transitions(), debug=True)
-    merge_business_hours.run(initial_tape=sys.argv[1], max_steps=500)
+    merge_business_hours.run(initial_tape=sys.argv[1], max_steps=5000)

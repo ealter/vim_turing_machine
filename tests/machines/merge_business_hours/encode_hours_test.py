@@ -1,7 +1,8 @@
 import pytest
 
+from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_in_5_bits
+from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_in_x_bits
 
 
 @pytest.mark.parametrize('number, encoded', [
@@ -9,8 +10,8 @@ from vim_turing_machine.machines.merge_business_hours.encode_hours import encode
     (10, '01010'),
     (31, '11111'),
 ])
-def test_encode_in_5_bits(number, encoded):
-    assert encode_in_5_bits(number) == encoded
+def test_encode_in_x_bits(number, encoded):
+    assert encode_in_x_bits(number) == '{}{}'.format(BLANK_CHARACTER, encoded)
 
 
 def test_encode_hours():
