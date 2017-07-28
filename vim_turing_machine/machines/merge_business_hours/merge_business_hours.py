@@ -48,16 +48,47 @@ def merge_business_hours_transitions():
     )
 
     OPEN_HOUR_IS_LESS_THAN = 'OpeningLessThan'
+    OPEN_HOUR_IS_GREATER_THAN = 'OpeningGreaterThan'
 
     # Then we compare the last 2 numbers.
     transitions.extend(
         compare_two_sequential_numbers(
             initial_state=BEGIN_MOVE,
             greater_than_or_equal_to_state=OPEN_HOUR_IS_LESS_THAN,
-            less_than_state=YES_FINAL_STATE,
+            less_than_state=OPEN_HOUR_IS_GREATER_THAN,
         )
     )
 
+    # *** If we do not need to merge ***
+    #
+    # Things are super simple if we don't need to merge the hours. We just need
+    # to copy over the closing hours from the input array.
+    COPY_CLOSING_HOUR_WITHOUT_MERGING = 'CopyClosingHourWithoutMerging'
+
+    # First move back to the beginning of the input array
+    transitions.extend(
+        move_to_blank_spaces(
+            initial_state=OPEN_HOUR_IS_GREATER_THAN,
+            final_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
+            final_character=BLANK_CHARACTER,
+            final_direction=FORWARDS,
+            direction=BACKWARDS,
+            num_blanks=2,
+        )
+    )
+
+    # Then just copy the closing hour
+    transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
+            num_bits=BITS_PER_NUMBER,
+            final_state=YES_FINAL_STATE,
+        )
+    )
+
+    # *** If we do need to merge ***
+    #
+    # Constants for merging the hours
     MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
     COPY_OVER_CLOSING_HOUR = 'CopyClosingHour'
     COMPARE_CLOSING_HOUR = 'CompareClosingHour'
