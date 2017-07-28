@@ -39,7 +39,7 @@ _p:  # Print state. Usage: `py$@"
 `ky$`op
 
 _l:  # Log the tape and state Usage: `ly$@"
-`tyipGop`kyyGp
+`tyipGopdd`kyyGp
 
 _s:  # State transitions
 {state_transitions}
