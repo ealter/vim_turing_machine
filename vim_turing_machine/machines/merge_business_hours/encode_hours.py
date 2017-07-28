@@ -5,22 +5,22 @@ import json
 import sys
 
 
-def encode_hours(hours):
+def encode_hours(hours, num_bits=5):
     result = ''
     for (begin, end) in hours:
-        result += encode_in_5_bits(begin)
-        result += encode_in_5_bits(end)
+        result += encode_in_x_bits(begin, num_bits)
+        result += encode_in_x_bits(end, num_bits)
 
     return result
 
 
-def encode_in_5_bits(number):
+def encode_in_x_bits(number, num_bits):
     encoded = '{:b}'.format(number)
-    assert len(encoded) <= 5
+    assert len(encoded) <= num_bits
 
     # Add leading zeros
-    return '0' * (5 - len(encoded)) + encoded
+    return '0' * (num_bits - len(encoded)) + encoded
 
 
 if __name__ == '__main__':
-    print(encode_hours(json.load(sys.stdin)))
+    print(encode_hours(json.loads(sys.stdin)))
