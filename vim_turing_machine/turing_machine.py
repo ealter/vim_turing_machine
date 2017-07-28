@@ -117,6 +117,8 @@ class TuringMachine(object):
         print('State: {}'.format(self._current_state))
         print()  # Add empty line
 
+    def get_tape(self):
+        return self._tape
 
 def validate_state_transitions(state_transitions):
     seen = defaultdict(list)

@@ -4,6 +4,8 @@ INITIAL_STATE = 'InitialState'
 YES_FINAL_STATE = 'YES'
 NO_FINAL_STATE = 'NO'
 
+BITS_PER_NUMBER = 3  # TODO: change this to 5 bits
+
 FINAL_STATES = [YES_FINAL_STATE, NO_FINAL_STATE]
 
 # Tape pointer direction
