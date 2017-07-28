@@ -14,12 +14,14 @@ VIM_TAPE_NUM_ROWS = 4
 
 VIM_TAPE_MAX_LENGTH = VIM_TAPE_WRAP_POSITION * VIM_TAPE_NUM_ROWS
 
+VIM_LOG_TAPE_AND_STATE = '`ly$@"'
+
 VIM_TEMPLATE = """0/_v1\rnf-ly$@"
 
 ### launch with ggyy@" ###
 
 # Init pointers
-_v1-gg0mh`h/_t\rnjmt`h/_k\rnjmk`h/_o\rnjmo`h/_p\rnjmp`h/_s\rnms`h/_n:\rnjmn`ny$@"
+_v1-gg0mh`h/_t\rnjmt`h/_l\rnjml`h/_k\rnjmk`h/_o\rnjmo`h/_p\rnjmp`h/_s\rnms`h/_n:\rnjmn`ny$@"
 
 _o:  # Output
 
@@ -31,10 +33,13 @@ _t:  # Current tape
 {initial_tape}
 
 _n:  # Next state transition. Usage: `ny$@"
-`t"tyiw`ky$`s/_\V\("-t\|---\)\rf:ly$@"
+{logging}`t"tyiw`ky$`s/_\V\("-t\|---\)\rf:ly$@"
 
 _p:  # Print state. Usage: `py$@"
 `ky$`op
+
+_l:  # Log the tape and state Usage: `ly$@"
+`tyipGop`kyyGp
 
 _s:  # State transitions
 {state_transitions}

@@ -10,6 +10,7 @@ from vim_turing_machine.vim_constants import VIM_RUN_REGISTER
 from vim_turing_machine.vim_constants import VIM_TAPE_MAX_LENGTH
 from vim_turing_machine.vim_constants import VIM_TAPE_WRAP_POSITION
 from vim_turing_machine.vim_constants import VIM_TEMPLATE
+from vim_turing_machine.vim_constants import VIM_LOG_TAPE_AND_STATE
 
 
 def create_initial_tape(input_tape):
@@ -65,7 +66,7 @@ class VimStateTransitionAdapter(object):
 
 class VimTuringMachine(TuringMachine):
 
-    def run(self, initial_tape):
+    def run(self, initial_tape, auto_step=True):
         """Genrates vim machine in an output file"""
         self.initialize_machine(initial_tape)
 
@@ -73,10 +74,13 @@ class VimTuringMachine(TuringMachine):
             machine.write(VIM_TEMPLATE.format(
                 initial_state=self._current_state,
                 initial_tape=create_initial_tape(self._tape),
+                logging=(
+                    VIM_LOG_TAPE_AND_STATE if auto_step and self._debug else ''
+                ),
                 state_transitions='\n'.join(
                     VimStateTransitionAdapter(state_transition).to_vim()
                     for state_transition in self._state_transitions
                 )
-            ).replace(VIM_RUN_REGISTER, '' if self._debug else VIM_RUN_REGISTER))
+            ).replace(VIM_RUN_REGISTER, VIM_RUN_REGISTER if auto_step else ''))
 
         print('Machine written to {}'.format(VIM_MACHINE_FILENAME))
