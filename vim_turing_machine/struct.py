@@ -18,5 +18,8 @@ class StateTransition(namedtuple('StateTransition', [
         assert self.previous_character in VALID_CHARACTERS
         assert self.next_character in VALID_CHARACTERS
         for invalid_char in INVALID_STATE_CHARACTERS:
-            assert invalid_char not in self.previous_state
-            assert invalid_char not in self.next_state
+            if invalid_char in self.previous_state:
+                raise AssertionError('{} is in {}'.format(invalid_char, self.previous_state))
+
+            if invalid_char in self.next_state:
+                raise AssertionError('{} is in {}'.format(invalid_char, self.next_state))

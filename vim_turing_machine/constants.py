@@ -1,5 +1,5 @@
 BLANK_CHARACTER = ' '
-INITIAL_STATE = 'initial_state'
+INITIAL_STATE = 'InitialState'
 
 YES_FINAL_STATE = 'YES'
 NO_FINAL_STATE = 'NO'
