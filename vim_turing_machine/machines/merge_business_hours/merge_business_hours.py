@@ -1,10 +1,13 @@
 """Our tape is defined in multiple segments, each separated by a blank character.
 
-INPUT OUTPUT SCRATCH_SPACE
+<Blank>INPUT<Blank>OUTPUT
 
-They are defined as follows:
-    Input: The initial input to the program encoded in a series of 5-bit
-        numbers. (start_1, end_1), (start_2, end_2) ...
+This program solves the "Merge Business Hours" interview question: Given a
+sorted list of possibly overlapping (opening, closing) hours, merge them.
+
+Example: [[1, 5], [2, 3], [4, 6], [9, 11]] -> [[1, 6], [9, 11]]
+
+We do this... on a turing machine.
 """
 import itertools
 import json
@@ -29,7 +32,10 @@ class MergeBusinessHoursGenerator(object):
         self._num_bits = num_bits
 
     def merge_business_hours_transitions(self):
-        # The first character should be an empty space. Let's move until we hit a non-empty space.
+        """This is the main orchestration point of the program"""
+        # The first character should be an empty space. Let's move until we hit
+        # a non-empty space. We need this empty space to exist so that we can
+        # later detect the beginning of the input.
         transitions = [
             StateTransition(
                 previous_state=INITIAL_STATE,
@@ -40,11 +46,12 @@ class MergeBusinessHoursGenerator(object):
             )
         ]
 
+        # This is the beginning of the loop that goes through the rest of the hours.
         CHECK_NEXT_SET_OF_HOURS = 'CheckNextSetOfHours'
-        BEGIN_COPY_NEXT_SET_OF_HOURS = 'CopyNextSetOfHours'
-        BEGIN_COMPARISON = 'BeginComparison'
 
-        # We begin the program by copying the first hours pair into the output array
+        # We begin the program by copying the first hours pair into the output
+        # array. At the end of this, the cursor will be at the end of the
+        # output array.
         transitions.extend(
             self.copy_bits_to_end_of_output(
                 initial_state=INITIAL_STATE,
@@ -52,6 +59,9 @@ class MergeBusinessHoursGenerator(object):
                 final_state=CHECK_NEXT_SET_OF_HOURS,
             )
         )
+
+        BEGIN_COPY_NEXT_SET_OF_HOURS = 'CopyNextSetOfHours'
+        BEGIN_COMPARISON = 'BeginComparison'
 
         # Then move back to the beginning of the input while checking if there is any input left
         transitions.extend(
@@ -61,6 +71,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
+        # Now it's time to copy the opening hours of the next pair.
         transitions.extend(
             self.copy_bits_to_end_of_output(
                 initial_state=BEGIN_COPY_NEXT_SET_OF_HOURS,
@@ -72,7 +83,8 @@ class MergeBusinessHoursGenerator(object):
         OPEN_HOUR_IS_LESS_THAN = 'OpeningLessThan'
         OPEN_HOUR_IS_GREATER_THAN = 'OpeningGreaterThan'
 
-        # Then we compare the last 2 numbers.
+        # Next we compare the closing hours of the previous pair with the
+        # opening hours of the current pair.
         transitions.extend(
             self.compare_two_sequential_numbers(
                 initial_state=BEGIN_COMPARISON,
@@ -87,7 +99,8 @@ class MergeBusinessHoursGenerator(object):
         # to copy over the closing hours from the input array.
         COPY_CLOSING_HOUR_WITHOUT_MERGING = 'CopyClosingHourWithoutMerging'
 
-        # First move back to the beginning of the input array
+        # First move back to the beginning of the input array since the copy
+        # function requires that.
         transitions.extend(
             self.move_to_blank_spaces(
                 initial_state=OPEN_HOUR_IS_GREATER_THAN,
@@ -99,7 +112,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # Then just copy the closing hour
+        # Then just copy the closing hour from the input array to the output array.
         transitions.extend(
             self.copy_bits_to_end_of_output(
                 initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
@@ -126,6 +139,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
+        # Move back to the beginning of the array.
         transitions.extend(
             self.move_to_blank_spaces(
                 initial_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
@@ -147,7 +161,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # Now comparing the closing hour so that we can merge it in
+        # Now we take the max of the 2 pairs' closing hours.
         transitions.extend(
             self.compare_two_sequential_numbers(
                 initial_state=COMPARE_CLOSING_HOUR,
