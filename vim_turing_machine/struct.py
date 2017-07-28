@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 from vim_turing_machine.constants import BACKWARDS
+from vim_turing_machine.constants import DO_NOT_MOVE
 from vim_turing_machine.constants import FORWARDS
 from vim_turing_machine.constants import INVALID_STATE_CHARACTERS
 from vim_turing_machine.constants import VALID_CHARACTERS
@@ -14,7 +15,7 @@ class StateTransition(namedtuple('StateTransition', [
     'tape_pointer_direction',
 ])):
     def validate(self):
-        assert self.tape_pointer_direction in (FORWARDS, BACKWARDS)
+        assert self.tape_pointer_direction in (FORWARDS, DO_NOT_MOVE, BACKWARDS)
         assert self.previous_character in VALID_CHARACTERS
         assert self.next_character in VALID_CHARACTERS
         for invalid_char in INVALID_STATE_CHARACTERS:
