@@ -17,8 +17,11 @@ clean:
 	rm machine.vim
 
 .PHONY: run-vim
-run-vim: venv
+build-vim: venv
 	venv/bin/python -m vim_turing_machine.machines.vim_is_number_even 11
 
-open-vim-machine: run-vim
+open-vim-machine: build-vim
 	vim -u vimrc machine.vim
+
+run-vim-machine: build-vim
+	vim -u vimrc machine.vim -c ':normal gg0yy@"'
