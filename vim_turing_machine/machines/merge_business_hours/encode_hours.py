@@ -5,7 +5,6 @@ import json
 import sys
 
 from vim_turing_machine.constants import BITS_PER_NUMBER
-from vim_turing_machine.constants import BLANK_CHARACTER
 
 
 def encode_hours(hours, num_bits=BITS_PER_NUMBER):
@@ -14,7 +13,7 @@ def encode_hours(hours, num_bits=BITS_PER_NUMBER):
         result += encode_in_x_bits(begin, num_bits)
         result += encode_in_x_bits(end, num_bits)
 
-    return BLANK_CHARACTER + result
+    return result
 
 
 def encode_in_x_bits(number, num_bits):
