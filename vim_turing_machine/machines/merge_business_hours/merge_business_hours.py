@@ -11,7 +11,6 @@ import sys
 
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
-from vim_turing_machine.constants import NO_FINAL_STATE
 from vim_turing_machine.constants import VALID_CHARACTERS
 from vim_turing_machine.constants import YES_FINAL_STATE
 from vim_turing_machine.struct import BACKWARDS
@@ -36,22 +35,136 @@ def merge_business_hours_transitions():
         )
     ]
 
-    BEGIN_MOVE = 'BeginInitialMove'
+    CHECK_NEXT_SET_OF_HOURS = 'CheckNextSetOfHours'
+    BEGIN_COPY_NEXT_SET_OF_HOURS = 'CopyNextSetOfHours'
+    BEGIN_COMPARISON = 'BeginComparison'
 
     # We begin the program by copying the first hours pair into the output array
     transitions.extend(
         copy_bits_to_end_of_output(
             initial_state=INITIAL_STATE,
-            num_bits=BITS_PER_NUMBER * 3,  # Copy (opening, closing, opening) to the output array
-            final_state=BEGIN_MOVE,
+            num_bits=BITS_PER_NUMBER * 2,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
+        )
+    )
+
+    # Then move back to the beginning of the input while checking if there is any input left
+    transitions.extend(
+        check_if_there_is_any_input_left(
+            initial_state=CHECK_NEXT_SET_OF_HOURS,
+            final_state=BEGIN_COPY_NEXT_SET_OF_HOURS,
         )
     )
 
     transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=BEGIN_COPY_NEXT_SET_OF_HOURS,
+            num_bits=BITS_PER_NUMBER,
+            final_state=BEGIN_COMPARISON,
+        )
+    )
+
+    OPEN_HOUR_IS_LESS_THAN = 'OpeningLessThan'
+    OPEN_HOUR_IS_GREATER_THAN = 'OpeningGreaterThan'
+
+    # Then we compare the last 2 numbers.
+    transitions.extend(
         compare_two_sequential_numbers(
-            initial_state=BEGIN_MOVE,
-            greater_than_or_equal_to_state=YES_FINAL_STATE,
-            less_than_state=NO_FINAL_STATE,
+            initial_state=BEGIN_COMPARISON,
+            greater_than_or_equal_to_state=OPEN_HOUR_IS_LESS_THAN,
+            less_than_state=OPEN_HOUR_IS_GREATER_THAN,
+        )
+    )
+
+    # *** If we do not need to merge ***
+    #
+    # Things are super simple if we don't need to merge the hours. We just need
+    # to copy over the closing hours from the input array.
+    COPY_CLOSING_HOUR_WITHOUT_MERGING = 'CopyClosingHourWithoutMerging'
+
+    # First move back to the beginning of the input array
+    transitions.extend(
+        move_to_blank_spaces(
+            initial_state=OPEN_HOUR_IS_GREATER_THAN,
+            final_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
+            final_character=BLANK_CHARACTER,
+            final_direction=FORWARDS,
+            direction=BACKWARDS,
+            num_blanks=2,
+        )
+    )
+
+    # Then just copy the closing hour
+    transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
+            num_bits=BITS_PER_NUMBER,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
+        )
+    )
+
+    # *** If we do need to merge ***
+    #
+    # Constants for merging the hours
+    MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
+    COPY_OVER_CLOSING_HOUR = 'CopyClosingHour'
+    COMPARE_CLOSING_HOUR = 'CompareClosingHour'
+    CLOSING_HOUR_IS_LARGER = 'ClosingHourIsLarger'
+    CLOSING_HOUR_IS_NOT_LARGER = 'ClosingHourIsNotLarger'
+
+    # If the opening hour is less than the closing hour of the previous pair,
+    # then we discard that opening hour. So essentially, [2, 7, 5] becomes [2, 7].
+    transitions.extend(
+        erase_number(
+            initial_state=OPEN_HOUR_IS_LESS_THAN,
+            final_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
+        )
+    )
+
+    transitions.extend(
+        move_to_blank_spaces(
+            initial_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
+            final_state=COPY_OVER_CLOSING_HOUR,
+            final_character=BLANK_CHARACTER,
+            final_direction=FORWARDS,
+            direction=BACKWARDS,
+            num_blanks=2,
+        )
+    )
+
+    # Now after erasing that number, we need to copy over the closing hour so
+    # that we can merge it in.
+    transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=COPY_OVER_CLOSING_HOUR,
+            num_bits=BITS_PER_NUMBER,
+            final_state=COMPARE_CLOSING_HOUR,
+        )
+    )
+
+    # Now comparing the closing hour so that we can merge it in
+    transitions.extend(
+        compare_two_sequential_numbers(
+            initial_state=COMPARE_CLOSING_HOUR,
+            less_than_state=CLOSING_HOUR_IS_LARGER,
+            greater_than_or_equal_to_state=CLOSING_HOUR_IS_NOT_LARGER,
+        )
+    )
+
+    # If the closing hour is less than or equal to the previous closing hour, just nuke it.
+    transitions.extend(
+        erase_number(
+            initial_state=CLOSING_HOUR_IS_NOT_LARGER,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
+        )
+    )
+
+    # But if the closing hour is greater than the previous closing hour, we
+    # should overwrite that closing hour with our larger value.
+    transitions.extend(
+        replace_number(
+            initial_state=CLOSING_HOUR_IS_LARGER,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
         )
     )
 
@@ -191,7 +304,8 @@ def copy_bits_to_end_of_output(initial_state, num_bits, final_state):
 
     Note: This overwrites the copied section with blanks.
 
-    At the end of copying, we will end up at the end of the output section.
+    Precondition: We are at the beginning of the input array
+    Postcondition: We are at the end of the output array
 
     :rtype: [StateTransition]
     """
@@ -312,7 +426,7 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
                     initial_state=already_have_one_bit_state(bit_index, bit_value),
                     direction=direction,
                     final_state=about_to_compare_bits_state(bit_index, bit_value),
-                    num_bits=BITS_PER_NUMBER - 1,
+                    num_bits=BITS_PER_NUMBER,
                 )
             )
 
@@ -347,6 +461,8 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
                 )
             )
 
+        direction = invert_direction(direction)
+
     # After we've determined the answer, we need to move to the end of the output array
     transitions.extend(
         move_to_blank_spaces(
@@ -373,6 +489,157 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
     return transitions
 
 
+def erase_number(initial_state, final_state):
+    """Erases the number under the cursor by replacing it with blanks.
+
+    Precondition: The cursor is at the end of that number
+    Postcondition: The cursor is right before the beginning of that number
+    """
+    def state_name(bit_index):
+        if bit_index == 0:
+            return initial_state
+        elif bit_index == BITS_PER_NUMBER:
+            return final_state
+        else:
+            return '{}ErasingBit{}'.format(initial_state, bit_index)
+
+    transitions = []
+
+    for bit_index in range(BITS_PER_NUMBER):
+        for bit_value in ['0', '1']:
+            transitions.append(
+                StateTransition(
+                    previous_state=state_name(bit_index),
+                    previous_character=bit_value,
+                    next_state=state_name(bit_index + 1),
+                    next_character=BLANK_CHARACTER,
+                    tape_pointer_direction=BACKWARDS,
+                )
+            )
+
+    return transitions
+
+
+def replace_number(initial_state, final_state):
+    """Replaces the 2nd to last number with the last number. So, [1, 5, 7] would become [1, 7].
+
+    Precondition: The cursor is at the end of the output array
+    Postcondition: The cursor is at the end of the output array
+    """
+    def need_to_read_bit(bit_index):
+        if bit_index == 0:
+            return initial_state
+        elif bit_index == BITS_PER_NUMBER:
+            return final_state
+        else:
+            return '{}ReadingBitIndexToMove{}'.format(initial_state, bit_index)
+
+    def read_bit(bit_index, bit_value):
+        return '{}ReadingBitIndexToMove{}Bit{}'.format(initial_state, bit_index, bit_value)
+
+    def overwrite_bit(bit_index, bit_value):
+        return '{}OverwritingBitIndex{}Bit{}'.format(initial_state, bit_index, bit_value)
+
+    def move_back_to_end(bit_index):
+        return '{}ReplacingNumberMovingBackToEnd{}'.format(initial_state, bit_index)
+
+    transitions = []
+    for bit_index in range(BITS_PER_NUMBER):
+        for bit_value in ['0', '1']:
+            # Start by reading the bit under the cursor. Replace it with a blank.
+            transitions.append(
+                StateTransition(
+                    previous_state=need_to_read_bit(bit_index),
+                    previous_character=bit_value,
+                    next_state=read_bit(bit_index, bit_value),
+                    next_character=BLANK_CHARACTER,
+                    tape_pointer_direction=BACKWARDS,
+                )
+            )
+
+            # Then go to the equivalent bit in the other number.
+            transitions.extend(
+                move_n_bits(
+                    initial_state=read_bit(bit_index, bit_value),
+                    direction=BACKWARDS,
+                    final_state=overwrite_bit(bit_index, bit_value),
+                    num_bits=BITS_PER_NUMBER,
+                )
+            )
+
+            # Then overwrite the current bit with the stored bit
+            transitions.extend(
+                StateTransition(
+                    previous_state=overwrite_bit(bit_index, bit_value),
+                    previous_character=bit_value_we_are_reading,
+                    next_state=move_back_to_end(bit_index),
+                    next_character=bit_value,
+                    tape_pointer_direction=FORWARDS,
+                )
+                for bit_value_we_are_reading in ['0', '1']
+            )
+
+        # Lastly move back to the end of the output array
+        transitions.extend(
+            move_to_blank_spaces(
+                initial_state=move_back_to_end(bit_index),
+                final_state=need_to_read_bit(bit_index + 1),
+                final_character=BLANK_CHARACTER,
+                final_direction=BACKWARDS,
+                direction=FORWARDS,
+                num_blanks=1,
+            )
+        )
+
+    return transitions
+
+
+def check_if_there_is_any_input_left(initial_state, final_state):
+    """
+    Precondition: We are at the end of the output array
+    Postcondition: We are at the beginning of the input array
+
+    If there is no more input left, this ends the program
+    """
+    CHECK_IF_ANY_HOURS_LEFT = '{}CheckIfAnyHoursLeft'.format(initial_state)
+
+    # Then move back to the beginning of the input
+    transitions = move_to_blank_spaces(
+        initial_state=initial_state,
+        final_state=CHECK_IF_ANY_HOURS_LEFT,
+        final_character=BLANK_CHARACTER,
+        final_direction=FORWARDS,
+        direction=BACKWARDS,
+        num_blanks=2,
+    )
+
+    # If we moved back 2 blanks and still ended on a blank, then there is
+    # nothing left in the input because we hit 2 blanks in a row.
+    transitions.append(
+        StateTransition(
+            previous_state=CHECK_IF_ANY_HOURS_LEFT,
+            previous_character=BLANK_CHARACTER,
+            next_state=YES_FINAL_STATE,
+            next_character=BLANK_CHARACTER,
+            tape_pointer_direction=FORWARDS,
+        )
+    )
+
+    # If we did not find a blank, then we just chill where we are
+    transitions.extend(
+        StateTransition(
+            previous_state=CHECK_IF_ANY_HOURS_LEFT,
+            previous_character=bit_value,
+            next_state=final_state,
+            next_character=bit_value,
+            tape_pointer_direction=DO_NOT_MOVE,
+        )
+        for bit_value in ['0', '1']
+    )
+
+    return transitions
+
+
 if __name__ == '__main__':
     merge_business_hours = TuringMachine(merge_business_hours_transitions(), debug=True)
-    merge_business_hours.run(initial_tape=sys.argv[1], max_steps=500)
+    merge_business_hours.run(initial_tape=sys.argv[1], max_steps=5000)
