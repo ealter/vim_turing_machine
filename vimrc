@@ -1,0 +1,1 @@
+set whichwrap+=b,s
