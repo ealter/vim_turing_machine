@@ -103,10 +103,19 @@ def merge_business_hours_transitions():
         )
     )
 
-    # If the closing hour is less than the previous closing hour, just nuke it.
+    # If the closing hour is less than or equal to the previous closing hour, just nuke it.
     transitions.extend(
         erase_number(
             initial_state=CLOSING_HOUR_IS_NOT_LARGER,
+            final_state=NO_FINAL_STATE,
+        )
+    )
+
+    # But if the closing hour is greater than the previous closing hour, we
+    # should overwrite that closing hour with our larger value.
+    transitions.extend(
+        replace_number(
+            initial_state=CLOSING_HOUR_IS_LARGER,
             final_state=NO_FINAL_STATE,
         )
     )
@@ -459,6 +468,80 @@ def erase_number(initial_state, final_state):
                     tape_pointer_direction=BACKWARDS,
                 )
             )
+
+    return transitions
+
+
+def replace_number(initial_state, final_state):
+    """Replaces the 2nd to last number with the last number. So, [1, 5, 7] would become [1, 7].
+
+    Precondition: The cursor is at the end of the output array
+    Postcondition: The cursor is at the end of the output array
+    """
+    def need_to_read_bit(bit_index):
+        if bit_index == 0:
+            return initial_state
+        elif bit_index == BITS_PER_NUMBER:
+            return final_state
+        else:
+            return '{}ReadingBitIndexToMove{}'.format(initial_state, bit_index)
+
+    def read_bit(bit_index, bit_value):
+        return '{}ReadingBitIndexToMove{}Bit{}'.format(initial_state, bit_index, bit_value)
+
+    def overwrite_bit(bit_index, bit_value):
+        return '{}OverwritingBitIndex{}Bit{}'.format(initial_state, bit_index, bit_value)
+
+    def move_back_to_end(bit_index):
+        return '{}ReplacingNumberMovingBackToEnd{}'.format(initial_state, bit_index)
+
+    transitions = []
+    for bit_index in range(BITS_PER_NUMBER):
+        for bit_value in ['0', '1']:
+            # Start by reading the bit under the cursor. Replace it with a blank.
+            transitions.append(
+                StateTransition(
+                    previous_state=need_to_read_bit(bit_index),
+                    previous_character=bit_value,
+                    next_state=read_bit(bit_index, bit_value),
+                    next_character=BLANK_CHARACTER,
+                    tape_pointer_direction=BACKWARDS,
+                )
+            )
+
+            # Then go to the equivalent bit in the other number.
+            transitions.extend(
+                move_n_bits(
+                    initial_state=read_bit(bit_index, bit_value),
+                    direction=BACKWARDS,
+                    final_state=overwrite_bit(bit_index, bit_value),
+                    num_bits=BITS_PER_NUMBER,
+                )
+            )
+
+            # Then overwrite the current bit with the stored bit
+            transitions.extend(
+                StateTransition(
+                    previous_state=overwrite_bit(bit_index, bit_value),
+                    previous_character=bit_value_we_are_reading,
+                    next_state=move_back_to_end(bit_index),
+                    next_character=bit_value,
+                    tape_pointer_direction=FORWARDS,
+                )
+                for bit_value_we_are_reading in ['0', '1']
+            )
+
+        # Lastly move back to the end of the output array
+        transitions.extend(
+            move_to_blank_spaces(
+                initial_state=move_back_to_end(bit_index),
+                final_state=need_to_read_bit(bit_index + 1),
+                final_character=BLANK_CHARACTER,
+                final_direction=BACKWARDS,
+                direction=FORWARDS,
+                num_blanks=1,
+            )
+        )
 
     return transitions
 
