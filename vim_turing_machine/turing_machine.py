@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import colored
 
 from vim_turing_machine.constants import BLANK_CHARACTER
@@ -117,13 +119,14 @@ class TuringMachine(object):
 
 
 def validate_state_transitions(state_transitions):
-    seen = set()
+    seen = defaultdict(list)
 
     for transition in state_transitions:
         transition.validate()
 
         key = (transition.previous_state, transition.previous_character)
-        if key in seen:
-            raise DuplicateStateTransitionException(key)
-        else:
-            seen.add(key)
+        seen[key].append(transition)
+
+    for transitions in seen.values():
+        if len(transitions) > 1:
+            raise DuplicateStateTransitionException(transitions)
