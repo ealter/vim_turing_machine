@@ -47,19 +47,46 @@ def merge_business_hours_transitions():
         )
     )
 
-    ERASE_NUMBER = 'EraseNow'
+    OPEN_HOUR_IS_LESS_THAN = 'OpeningLessThan'
 
+    # Then we compare the last 2 numbers.
     transitions.extend(
         compare_two_sequential_numbers(
             initial_state=BEGIN_MOVE,
             greater_than_or_equal_to_state=YES_FINAL_STATE,
-            less_than_state=ERASE_NUMBER,
+            less_than_state=OPEN_HOUR_IS_LESS_THAN,
+        )
+    )
+
+    MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
+    COPY_OVER_CLOSING_HOUR = 'CopyClosingHour'
+
+    # If the opening hour is less than the closing hour of the previous pair,
+    # then we discard that opening hour. So essentially, [2, 7, 5] becomes [2, 7].
+    transitions.extend(
+        erase_number(
+            initial_state=OPEN_HOUR_IS_LESS_THAN,
+            final_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
         )
     )
 
     transitions.extend(
-        erase_number(
-            initial_state=ERASE_NUMBER,
+        move_to_blank_spaces(
+            initial_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
+            final_state=COPY_OVER_CLOSING_HOUR,
+            final_character=BLANK_CHARACTER,
+            final_direction=FORWARDS,
+            direction=BACKWARDS,
+            num_blanks=2,
+        )
+    )
+
+    # Now after erasing that number, we need to copy over the closing hour so
+    # that we can merge it in.
+    transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=COPY_OVER_CLOSING_HOUR,
+            num_bits=BITS_PER_NUMBER,
             final_state=NO_FINAL_STATE,
         )
     )
@@ -200,7 +227,8 @@ def copy_bits_to_end_of_output(initial_state, num_bits, final_state):
 
     Note: This overwrites the copied section with blanks.
 
-    At the end of copying, we will end up at the end of the output section.
+    Precondition: We are at the beginning of the input array
+    Postcondition: We are at the end of the output array
 
     :rtype: [StateTransition]
     """
