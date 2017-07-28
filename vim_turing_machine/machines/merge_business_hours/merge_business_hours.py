@@ -20,6 +20,8 @@ from vim_turing_machine.struct import DO_NOT_MOVE
 from vim_turing_machine.struct import FORWARDS
 from vim_turing_machine.struct import StateTransition
 from vim_turing_machine.turing_machine import TuringMachine
+from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
+from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
 
 
 BITS_PER_NUMBER = 3  # TODO: change this to 5 bits
