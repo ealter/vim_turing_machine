@@ -4,10 +4,11 @@ arv1 and outputs the initial tape."""
 import json
 import sys
 
+from vim_turing_machine.constants import BITS_PER_NUMBER
 from vim_turing_machine.constants import BLANK_CHARACTER
 
 
-def decode_hours(hours, num_bits=5):
+def decode_hours(hours, num_bits=BITS_PER_NUMBER):
     result = []
     clean_hours = hours.replace(BLANK_CHARACTER, '').replace(' ', '')
     index = 0

@@ -23,7 +23,7 @@ clean:
 .PHONY: run
 run: venv
 	# venv/bin/python -m vim_turing_machine.machines.is_number_even 11
-	venv/bin/python -m vim_turing_machine.machines.merge_business_hours.merge_business_hours 'X001100110111'
+	venv/bin/python -m vim_turing_machine.machines.merge_business_hours.merge_business_hours '[[1,4],[6,7]]' 3
 
 .PHONY: run-vim
 build-vim: venv

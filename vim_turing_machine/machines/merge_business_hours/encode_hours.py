@@ -4,8 +4,8 @@ from stdin and outputs the initial tape."""
 import json
 import sys
 
+from vim_turing_machine.constants import BITS_PER_NUMBER
 from vim_turing_machine.constants import BLANK_CHARACTER
-from vim_turing_machine.machines.merge_business_hours.merge_business_hours import BITS_PER_NUMBER
 
 
 def encode_hours(hours, num_bits=BITS_PER_NUMBER):

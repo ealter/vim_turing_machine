@@ -7,8 +7,10 @@ They are defined as follows:
         numbers. (start_1, end_1), (start_2, end_2) ...
 """
 import itertools
+import json
 import sys
 
+from vim_turing_machine.constants import BITS_PER_NUMBER
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import VALID_CHARACTERS
@@ -641,5 +643,12 @@ def check_if_there_is_any_input_left(initial_state, final_state):
 
 
 if __name__ == '__main__':
+    input_string = json.loads(sys.argv[1])
+    num_bits = int(sys.argv[2])
+
+    initial_tape = encode_hours(input_string, num_bits)
+
     merge_business_hours = TuringMachine(merge_business_hours_transitions(), debug=True)
-    merge_business_hours.run(initial_tape=sys.argv[1], max_steps=5000)
+    merge_business_hours.run(initial_tape=initial_tape, max_steps=5000)
+
+    print(decode_hours(''.join(merge_business_hours.get_tape()), num_bits))
