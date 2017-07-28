@@ -47,11 +47,20 @@ def merge_business_hours_transitions():
         )
     )
 
+    ERASE_NUMBER = 'EraseNow'
+
     transitions.extend(
         compare_two_sequential_numbers(
             initial_state=BEGIN_MOVE,
             greater_than_or_equal_to_state=YES_FINAL_STATE,
-            less_than_state=NO_FINAL_STATE,
+            less_than_state=ERASE_NUMBER,
+        )
+    )
+
+    transitions.extend(
+        erase_number(
+            initial_state=ERASE_NUMBER,
+            final_state=NO_FINAL_STATE,
         )
     )
 
@@ -369,6 +378,37 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
             num_blanks=1,
         )
     )
+
+    return transitions
+
+
+def erase_number(initial_state, final_state):
+    """Erases the number under the cursor by replacing it with blanks.
+
+    Precondition: The cursor is at the end of that number
+    Postcondition: The cursor is right before the beginning of that number
+    """
+    def state_name(bit_index):
+        if bit_index == 0:
+            return initial_state
+        elif bit_index == BITS_PER_NUMBER:
+            return final_state
+        else:
+            return '{}ErasingBit{}'.format(initial_state, bit_index)
+
+    transitions = []
+
+    for bit_index in range(BITS_PER_NUMBER):
+        for bit_value in ['0', '1']:
+            transitions.append(
+                StateTransition(
+                    previous_state=state_name(bit_index),
+                    previous_character=bit_value,
+                    next_state=state_name(bit_index + 1),
+                    next_character=BLANK_CHARACTER,
+                    tape_pointer_direction=BACKWARDS,
+                )
+            )
 
     return transitions
 
