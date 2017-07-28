@@ -15,19 +15,18 @@ from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import VALID_CHARACTERS
 from vim_turing_machine.constants import YES_FINAL_STATE
+from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
+from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
 from vim_turing_machine.struct import BACKWARDS
 from vim_turing_machine.struct import DO_NOT_MOVE
 from vim_turing_machine.struct import FORWARDS
 from vim_turing_machine.struct import StateTransition
 from vim_turing_machine.turing_machine import TuringMachine
-from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
 
 
 class MergeBusinessHoursGenerator(object):
     def __init__(self, num_bits=BITS_PER_NUMBER):
         self._num_bits = num_bits
-
 
     def merge_business_hours_transitions(self):
         # The first character should be an empty space. Let's move until we hit a non-empty space.
@@ -176,7 +175,6 @@ class MergeBusinessHoursGenerator(object):
 
         return transitions
 
-
     def invert_bit(self, bit_value):
         if bit_value == '0':
             return '1'
@@ -185,7 +183,6 @@ class MergeBusinessHoursGenerator(object):
         else:
             raise AssertionError('Invalid bit {}'.format(bit_value))
 
-
     def invert_direction(self, direction):
         if direction == BACKWARDS:
             return FORWARDS
@@ -193,7 +190,6 @@ class MergeBusinessHoursGenerator(object):
             return BACKWARDS
         else:
             raise AssertionError('Invalid direction {}'.format(direction))
-
 
     def noop_when_non_blank(self, state, direction):
         return (
@@ -212,7 +208,6 @@ class MergeBusinessHoursGenerator(object):
                 tape_pointer_direction=direction,
             ),
         )
-
 
     def move_n_bits(self, initial_state, direction, final_state, num_bits):
         """Moves 'num_bits' in the specified direction. Errors if it encounters a
@@ -243,8 +238,15 @@ class MergeBusinessHoursGenerator(object):
             for bit_value in ['0', '1']
         ])
 
-
-    def move_to_blank_spaces(self, initial_state, final_state, final_character, final_direction, direction, num_blanks):
+    def move_to_blank_spaces(
+        self,
+        initial_state,
+        final_state,
+        final_character,
+        final_direction,
+        direction,
+        num_blanks,
+    ):
         """Moves along the array until it hits a certain number of blank spaces.
 
         :param str initial_state: The state used to trigger this code
@@ -300,7 +302,6 @@ class MergeBusinessHoursGenerator(object):
                 )
 
         return transitions
-
 
     def copy_bits_to_end_of_output(self, initial_state, num_bits, final_state):
         """
@@ -364,7 +365,6 @@ class MergeBusinessHoursGenerator(object):
             )
             for bit_index in range(num_bits)
         )
-
 
     def compare_two_sequential_numbers(self, initial_state, greater_than_or_equal_to_state, less_than_state):
         """
@@ -445,7 +445,7 @@ class MergeBusinessHoursGenerator(object):
                         previous_character=bit_value,
                         next_state=about_to_read_first_bit_state(bit_index + 1),
                         next_character=bit_value,
-                        tape_pointer_direction=self.invert_direction(direction),
+                        tape_pointer_direction=FORWARDS,
                     )
                 )
 
@@ -494,7 +494,6 @@ class MergeBusinessHoursGenerator(object):
 
         return transitions
 
-
     def erase_number(self, initial_state, final_state):
         """Erases the number under the cursor by replacing it with blanks.
 
@@ -524,7 +523,6 @@ class MergeBusinessHoursGenerator(object):
                 )
 
         return transitions
-
 
     def replace_number(self, initial_state, final_state):
         """Replaces the 2nd to last number with the last number. So, [1, 5, 7] would become [1, 7].
@@ -598,7 +596,6 @@ class MergeBusinessHoursGenerator(object):
             )
 
         return transitions
-
 
     def check_if_there_is_any_input_left(self, initial_state, final_state):
         """
