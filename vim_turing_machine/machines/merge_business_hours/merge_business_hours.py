@@ -53,13 +53,16 @@ def merge_business_hours_transitions():
     transitions.extend(
         compare_two_sequential_numbers(
             initial_state=BEGIN_MOVE,
-            greater_than_or_equal_to_state=YES_FINAL_STATE,
-            less_than_state=OPEN_HOUR_IS_LESS_THAN,
+            greater_than_or_equal_to_state=OPEN_HOUR_IS_LESS_THAN,
+            less_than_state=YES_FINAL_STATE,
         )
     )
 
     MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
     COPY_OVER_CLOSING_HOUR = 'CopyClosingHour'
+    COMPARE_CLOSING_HOUR = 'CompareClosingHour'
+    CLOSING_HOUR_IS_LARGER = 'ClosingHourIsLarger'
+    CLOSING_HOUR_IS_NOT_LARGER = 'ClosingHourIsNotLarger'
 
     # If the opening hour is less than the closing hour of the previous pair,
     # then we discard that opening hour. So essentially, [2, 7, 5] becomes [2, 7].
@@ -87,6 +90,23 @@ def merge_business_hours_transitions():
         copy_bits_to_end_of_output(
             initial_state=COPY_OVER_CLOSING_HOUR,
             num_bits=BITS_PER_NUMBER,
+            final_state=COMPARE_CLOSING_HOUR,
+        )
+    )
+
+    # Now comparing the closing hour so that we can merge it in
+    transitions.extend(
+        compare_two_sequential_numbers(
+            initial_state=COMPARE_CLOSING_HOUR,
+            greater_than_or_equal_to_state=CLOSING_HOUR_IS_LARGER,
+            less_than_state=CLOSING_HOUR_IS_NOT_LARGER,
+        )
+    )
+
+    # If the closing hour is less than the previous closing hour, just nuke it.
+    transitions.extend(
+        erase_number(
+            initial_state=CLOSING_HOUR_IS_NOT_LARGER,
             final_state=NO_FINAL_STATE,
         )
     )
@@ -349,7 +369,7 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
                     initial_state=already_have_one_bit_state(bit_index, bit_value),
                     direction=direction,
                     final_state=about_to_compare_bits_state(bit_index, bit_value),
-                    num_bits=BITS_PER_NUMBER - 1,
+                    num_bits=BITS_PER_NUMBER,
                 )
             )
 
@@ -383,6 +403,8 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
                     tape_pointer_direction=invert_direction(direction),
                 )
             )
+
+        direction = invert_direction(direction)
 
     # After we've determined the answer, we need to move to the end of the output array
     transitions.extend(
