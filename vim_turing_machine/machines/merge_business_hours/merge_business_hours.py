@@ -255,6 +255,10 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
     Precondition: The cursor is at the end of the output array
     Postcondition: The cursor is at the end of the output array
     """
+    # We can't directly transition into the >= or < states since we need to end
+    # up at the end of the output array.
+    FOUND_GREATER_THAN_OR_EQUAL_TO_STATE = '{}FoundGreaterThanOrEqualTo'.format(initial_state)
+    FOUND_LESS_THAN_STATE = '{}FoundLessThan'.format(initial_state)
 
     def already_have_one_bit_state(bit_index, bit_value):
         """This means that we've read a 'bit_value' at 'bit_index'. We are
@@ -267,7 +271,7 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
         'already_have_one_bit_state' after reading its value."""
         if bit_index == BITS_PER_NUMBER:
             # At this point, we know that the numbers are equal since we've compared every bit.
-            return greater_than_or_equal_to_state
+            return FOUND_GREATER_THAN_OR_EQUAL_TO_STATE
         else:
             return '{}BitIndex{}'.format(initial_state, bit_index)
 
@@ -290,9 +294,6 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
     # Then begin comparing the digits one by one from largest to smallest
     for bit_index in range(BITS_PER_NUMBER):
         for bit_value in ['0', '1']:
-            for transition in transitions:
-                print(transition)
-
             transitions.append(
                 # Read the current bit
                 StateTransition(
@@ -334,17 +335,40 @@ def compare_two_sequential_numbers(initial_state, greater_than_or_equal_to_state
                     previous_state=about_to_compare_bits_state(bit_index, bit_value),
                     previous_character=invert_bit(bit_value),
                     next_state=(
-                        greater_than_or_equal_to_state
+                        FOUND_GREATER_THAN_OR_EQUAL_TO_STATE
                         if (
                             (bit_value == '1' and direction == FORWARDS) or
                             (bit_value == '0' and direction == BACKWARDS)
                         )
-                        else less_than_state
+                        else FOUND_LESS_THAN_STATE
                     ),
                     next_character=invert_bit(bit_value),
                     tape_pointer_direction=invert_direction(direction),
                 )
             )
+
+    # After we've determined the answer, we need to move to the end of the output array
+    transitions.extend(
+        move_to_blank_spaces(
+            initial_state=FOUND_GREATER_THAN_OR_EQUAL_TO_STATE,
+            final_state=greater_than_or_equal_to_state,
+            final_character=BLANK_CHARACTER,
+            final_direction=BACKWARDS,
+            direction=FORWARDS,
+            num_blanks=1,
+        )
+    )
+
+    transitions.extend(
+        move_to_blank_spaces(
+            initial_state=FOUND_LESS_THAN_STATE,
+            final_state=less_than_state,
+            final_character=BLANK_CHARACTER,
+            final_direction=BACKWARDS,
+            direction=FORWARDS,
+            num_blanks=1,
+        )
+    )
 
     return transitions
 
