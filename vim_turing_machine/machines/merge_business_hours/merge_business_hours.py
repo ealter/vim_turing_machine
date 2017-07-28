@@ -11,15 +11,15 @@ import sys
 
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
+from vim_turing_machine.constants import VALID_CHARACTERS
 from vim_turing_machine.constants import YES_FINAL_STATE
 from vim_turing_machine.struct import BACKWARDS
+from vim_turing_machine.struct import DO_NOT_MOVE
 from vim_turing_machine.struct import FORWARDS
 from vim_turing_machine.struct import StateTransition
 from vim_turing_machine.turing_machine import TuringMachine
 
 
-ADVANCE_TO_END_OF_NUMBER = 'onward!'
-FOUND_END_OF_NUMBER = 'eof'
 BITS_PER_NUMBER = 5
 
 
@@ -66,6 +66,64 @@ def noop_when_non_blank(state, direction):
     )
 
 
+def move_to_blank_spaces(initial_state, final_state, final_character, final_direction, direction, num_blanks):
+    """Moves along the array until it hits a certain number of blank spaces.
+
+    :param str initial_state: The state used to trigger this code
+    :param str final_state: The state we should finish with
+    :param str final_character: The character we should write on that state transition
+    :param int final_direction: Which direction we should move at the end
+    :param int direction: Which direction we should search in
+    :param int num_blanks: How many blanks to search for
+    """
+
+    def state_name(blank_num):
+        return '{}Searching{}'.format(initial_state, blank_num)
+
+    transitions = [
+        # Rename our current state
+        StateTransition(
+            previous_state=initial_state,
+            previous_character=character,
+            next_state=state_name(blank_num=0),
+            next_character=character,
+            tape_pointer_direction=DO_NOT_MOVE,
+        )
+        for character in VALID_CHARACTERS
+    ]
+
+    for blank_num in range(num_blanks):
+        transitions.extend(
+            # If we're looking for the first blank, then keep going until we hit it
+            noop_when_non_blank(state_name(blank_num=blank_num), direction=direction)
+        )
+
+        if blank_num == num_blanks - 1:
+            # This is the last blank
+            transitions.append(
+                StateTransition(
+                    previous_state=state_name(blank_num),
+                    previous_character=BLANK_CHARACTER,
+                    next_state=final_state,
+                    next_character=final_character,
+                    tape_pointer_direction=final_direction,
+                )
+            )
+        else:
+            # This is not the last blank
+            transitions.append(
+                StateTransition(
+                    previous_state=state_name(blank_num),
+                    previous_character=BLANK_CHARACTER,
+                    next_state=state_name(blank_num + 1),
+                    next_character=BLANK_CHARACTER,
+                    tape_pointer_direction=direction,
+                )
+            )
+
+    return transitions
+
+
 def copy_bits_to_end_of_output(initial_state, num_bits, final_state):
     """
     :param string initial_state: The state used before we start to move
@@ -91,110 +149,38 @@ def copy_bits_to_end_of_output(initial_state, num_bits, final_state):
     def copy_bit(bit_index, bit_value):
         base_copying_state = '{}Bit{}'.format(state_name(bit_index + 1), bit_value)
 
-        return (
+        return [
             # Let's start copying the character. Note how we replace it with a blank.
             StateTransition(
                 previous_state=state_name(bit_index),
                 previous_character=bit_value,
-                next_state=base_copying_state,
+                next_state='{}Forward'.format(base_copying_state),
                 next_character=BLANK_CHARACTER,
                 tape_pointer_direction=FORWARDS,
             ),
 
-            # If we're looking for the first blank, then keep going until we hit it
-            *noop_when_non_blank(base_copying_state, direction=FORWARDS),
-
-            # With this first blank, we need to keep looking for the next one
-            StateTransition(
-                previous_state=base_copying_state,
-                previous_character=BLANK_CHARACTER,
-                next_state='{}Blank1'.format(base_copying_state),
-                next_character=BLANK_CHARACTER,
-                tape_pointer_direction=FORWARDS,
-            ),
-
-            # After the first blank, we've hit the end of the input array. Now
-            # we're looking for the second which will denote the end of the
-            # output array
-            *noop_when_non_blank(
-                '{}Blank1'.format(base_copying_state),
+            *move_to_blank_spaces(
+                initial_state='{}Forward'.format(base_copying_state),
+                # If we're on the last character, don't go backwards
+                final_state=(
+                    '{}Backwards'.format(base_copying_state)
+                    if bit_index < num_bits - 1
+                    else final_state
+                ),
+                final_character=bit_value,
+                final_direction=DO_NOT_MOVE,
                 direction=FORWARDS,
+                num_blanks=2,
             ),
-
-            # Now things get fun. We've finally hit the end of the output
-            # array! We can now write the character we were carrying.
-            StateTransition(
-                previous_state='{}Blank1'.format(base_copying_state),
-                previous_character=BLANK_CHARACTER,
-                next_state=backtracking_state(bit_index),
-                next_character=bit_value,
-                tape_pointer_direction=BACKWARDS,
-            ),
-
-            # Now search for the end of the output array (i.e. after we hit 2 blanks)
-
-            # If we're looking for the first blank, then keep going until we hit it
-            *noop_when_non_blank(base_copying_state, direction=FORWARDS),
-
-            # With this first blank, we need to keep looking for the next one
-            StateTransition(
-                previous_state=base_copying_state,
-                previous_character=BLANK_CHARACTER,
-                next_state='{}Blank1'.format(base_copying_state),
-                next_character=BLANK_CHARACTER,
-                tape_pointer_direction=FORWARDS,
-            ),
-
-            # After the first blank, we've hit the end of the input array. Now
-            # we're looking for the second which will denote the end of the
-            # output array
-            *noop_when_non_blank(
-                '{}Blank1'.format(base_copying_state),
-                direction=FORWARDS,
-            ),
-
-            # Now things get fun. We've finally hit the end of the output
-            # array! We can now write the character we were carrying.
-            StateTransition(
-                previous_state='{}Blank1'.format(base_copying_state),
-                previous_character=BLANK_CHARACTER,
-                next_state=backtracking_state(bit_index),
-                next_character=bit_value,
-                tape_pointer_direction=BACKWARDS,
-            ),
-
-            # Then we backtrack back to the beginning of the input again (i.e. until we hit 2 blank spaces)
-
-            # Start looking for the first space
-            *noop_when_non_blank(
-                backtracking_state(bit_index),
+            *move_to_blank_spaces(
+                initial_state='{}Backwards'.format(base_copying_state),
+                final_state=state_name(bit_index + 1),
+                final_character=BLANK_CHARACTER,
+                final_direction=FORWARDS,
                 direction=BACKWARDS,
+                num_blanks=2,
             ),
-
-            # When we hit the first space, start looking for the next one
-            StateTransition(
-                previous_state=backtracking_state(bit_index),
-                previous_character=BLANK_CHARACTER,
-                next_state='{}Blank1'.format(backtracking_state(bit_index)),
-                next_character=BLANK_CHARACTER,
-                tape_pointer_direction=BACKWARDS,
-            ),
-
-            # Now keep looking for the next blank
-            *noop_when_non_blank(
-                '{}Blank1'.format(backtracking_state(bit_index)),
-                direction=BACKWARDS,
-            ),
-
-            # When we hit the 2nd blank, we're ready to transition back to copying the next character
-            StateTransition(
-                previous_state='{}Blank1'.format(backtracking_state(bit_index)),
-                previous_character=BLANK_CHARACTER,
-                next_state=state_name(bit_index),
-                next_character=BLANK_CHARACTER,
-                tape_pointer_direction=FORWARDS,
-            ),
-        )
+        ]
 
     return itertools.chain.from_iterable(
         (
