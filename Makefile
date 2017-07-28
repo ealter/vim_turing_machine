@@ -7,6 +7,7 @@ venv:
 .PHONY: install-hooks
 install-hooks: venv
 	venv/bin/pre-commit install-hooks
+	venv/bin/pre-commit install
 
 .PHONY: test
 test:
