@@ -35,9 +35,9 @@ class VimStateTransitionAdapter(object):
     def _move_pointer(self):
         """Returns the vim commands to move the tape after transition"""
         if self.st.tape_pointer_direction == FORWARDS:
-            return '`twmt'
+            return '`tf lmt'
         elif self.st.tape_pointer_direction == BACKWARDS:
-            return '`tbmt',
+            return '`tF hmt'
         else:
             return ''
 
@@ -50,15 +50,13 @@ class VimTuringMachine(TuringMachine):
         with open(VIM_MACHINE_FILENAME, 'w') as machine:
             machine.write(VIM_TEMPLATE.format(
                 initial_state=self._current_state,
-                initial_tape=' '.join(self._tape+[' ']),
+                initial_tape=' '.join(self._tape+2*[' ']),
                 state_transitions='\n'.join(
-                    ['_s:  # State transitions'] +
                     [
                         VimStateTransitionAdapter(state_transition).to_vim()
                         for state_transition in self._state_transitions
-                    ] +
-                    ['# End State transitions']
+                    ]
                 )
-            ))
+            ).replace('@"', '' if self._debug else '@"'))
 
         print('Machine written to {}'.format(VIM_MACHINE_FILENAME))

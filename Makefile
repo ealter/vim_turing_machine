@@ -18,7 +18,7 @@ clean:
 
 .PHONY: run-vim
 run-vim: venv
-	venv/bin/python -m vim_turing_machine.machines.vim_is_number_even 10
+	venv/bin/python -m vim_turing_machine.machines.vim_is_number_even 11
 
 open-vim-machine: run-vim
 	vim -u vimrc machine.vim

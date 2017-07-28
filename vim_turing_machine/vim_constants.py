@@ -7,9 +7,7 @@ VIM_TEMPLATE = """0/_v1\rnf-ly$@"
 ### launch with ggyy@" ###
 
 # Init pointers
-_v1-gg0mh`h/_t\rnjmt`h/_k\rnjmk`h/_o\rnjmo`h/_i\rnjmi`h/_v2\rnf-ly$@"
-_v2-`h/_s\rnjms`h/_n:\rnjmn`h/_v3\rnf-ly$@"
-_v3-`h/_a\rnjma`ny$@"
+_v1-gg0mh`h/_t\rnjmt`h/_k\rnjmk`h/_o\rnjmo`h/_p\rnjmp`h/_i\rnjmi`h/_s\rnjms`h/_n:\rnjmn`h/_a\rnjma`ny$@"
 
 _o:  # Output
 
@@ -34,10 +32,17 @@ __96 `__97 a__98 b__99 c_100 d_101 e_102 f_103 g_104 h_105 i_106 j_107 k_108 l_1
 _112 p_113 q_114 r_115 s_116 t_117 u_118 v_119 w_120 x_121 y_122 z_123 {{_124 |_125 }}_126 ~_127 ._
 _uuu .
 
-_n:  # Next state transition. Usage:( `ny$@" )
-`t"tyt `ky$/_\V"-t\rf:ly$@"
+_n:  # Next state transition. Usage: `ny$@"
+`t"tyt `ky$`s/_\V\("-t\|---\)\rf:ly$@"
 
+_p:  # Print state. Usage: `py$@"
+`ky$`op
+
+_s:  # State transitions
 {state_transitions}
+# End State transitions
+# Print state when unknown transition
+_---: `py$@"
 
 # vim: set whichwrap+=b,s
 """

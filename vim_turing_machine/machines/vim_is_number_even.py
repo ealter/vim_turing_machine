@@ -10,7 +10,7 @@ from vim_turing_machine.struct import StateTransition
 from vim_turing_machine.vim_machine import VimTuringMachine
 
 
-ADVANCE_TO_END_OF_NUMBER = 'onward!'
+ADVANCE_TO_END_OF_NUMBER = 'onward'
 FOUND_END_OF_NUMBER = 'eof'
 
 
@@ -85,5 +85,5 @@ number_is_even_state_transitions = (
 
 
 if __name__ == '__main__':
-    even_odd_turing_machine = VimTuringMachine(number_is_even_state_transitions, debug=True)
+    even_odd_turing_machine = VimTuringMachine(number_is_even_state_transitions, debug=False)
     even_odd_turing_machine.run(initial_tape=sys.argv[1])
