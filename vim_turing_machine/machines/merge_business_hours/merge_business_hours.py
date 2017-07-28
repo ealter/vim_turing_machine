@@ -11,7 +11,6 @@ import sys
 
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
-from vim_turing_machine.constants import NO_FINAL_STATE
 from vim_turing_machine.constants import VALID_CHARACTERS
 from vim_turing_machine.constants import YES_FINAL_STATE
 from vim_turing_machine.struct import BACKWARDS
@@ -36,14 +35,32 @@ def merge_business_hours_transitions():
         )
     ]
 
-    BEGIN_MOVE = 'BeginInitialMove'
+    CHECK_NEXT_SET_OF_HOURS = 'CheckNextSetOfHours'
+    BEGIN_COPY_NEXT_SET_OF_HOURS = 'CopyNextSetOfHours'
+    BEGIN_COMPARISON = 'BeginComparison'
 
     # We begin the program by copying the first hours pair into the output array
     transitions.extend(
         copy_bits_to_end_of_output(
             initial_state=INITIAL_STATE,
-            num_bits=BITS_PER_NUMBER * 3,  # Copy (opening, closing, opening) to the output array
-            final_state=BEGIN_MOVE,
+            num_bits=BITS_PER_NUMBER * 2,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
+        )
+    )
+
+    # Then move back to the beginning of the input while checking if there is any input left
+    transitions.extend(
+        check_if_there_is_any_input_left(
+            initial_state=CHECK_NEXT_SET_OF_HOURS,
+            final_state=BEGIN_COPY_NEXT_SET_OF_HOURS,
+        )
+    )
+
+    transitions.extend(
+        copy_bits_to_end_of_output(
+            initial_state=BEGIN_COPY_NEXT_SET_OF_HOURS,
+            num_bits=BITS_PER_NUMBER,
+            final_state=BEGIN_COMPARISON,
         )
     )
 
@@ -53,7 +70,7 @@ def merge_business_hours_transitions():
     # Then we compare the last 2 numbers.
     transitions.extend(
         compare_two_sequential_numbers(
-            initial_state=BEGIN_MOVE,
+            initial_state=BEGIN_COMPARISON,
             greater_than_or_equal_to_state=OPEN_HOUR_IS_LESS_THAN,
             less_than_state=OPEN_HOUR_IS_GREATER_THAN,
         )
@@ -82,7 +99,7 @@ def merge_business_hours_transitions():
         copy_bits_to_end_of_output(
             initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
             num_bits=BITS_PER_NUMBER,
-            final_state=YES_FINAL_STATE,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
         )
     )
 
@@ -138,7 +155,7 @@ def merge_business_hours_transitions():
     transitions.extend(
         erase_number(
             initial_state=CLOSING_HOUR_IS_NOT_LARGER,
-            final_state=NO_FINAL_STATE,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
         )
     )
 
@@ -147,7 +164,7 @@ def merge_business_hours_transitions():
     transitions.extend(
         replace_number(
             initial_state=CLOSING_HOUR_IS_LARGER,
-            final_state=NO_FINAL_STATE,
+            final_state=CHECK_NEXT_SET_OF_HOURS,
         )
     )
 
@@ -573,6 +590,52 @@ def replace_number(initial_state, final_state):
                 num_blanks=1,
             )
         )
+
+    return transitions
+
+
+def check_if_there_is_any_input_left(initial_state, final_state):
+    """
+    Precondition: We are at the end of the output array
+    Postcondition: We are at the beginning of the input array
+
+    If there is no more input left, this ends the program
+    """
+    CHECK_IF_ANY_HOURS_LEFT = '{}CheckIfAnyHoursLeft'.format(initial_state)
+
+    # Then move back to the beginning of the input
+    transitions = move_to_blank_spaces(
+        initial_state=initial_state,
+        final_state=CHECK_IF_ANY_HOURS_LEFT,
+        final_character=BLANK_CHARACTER,
+        final_direction=FORWARDS,
+        direction=BACKWARDS,
+        num_blanks=2,
+    )
+
+    # If we moved back 2 blanks and still ended on a blank, then there is
+    # nothing left in the input because we hit 2 blanks in a row.
+    transitions.append(
+        StateTransition(
+            previous_state=CHECK_IF_ANY_HOURS_LEFT,
+            previous_character=BLANK_CHARACTER,
+            next_state=YES_FINAL_STATE,
+            next_character=BLANK_CHARACTER,
+            tape_pointer_direction=FORWARDS,
+        )
+    )
+
+    # If we did not find a blank, then we just chill where we are
+    transitions.extend(
+        StateTransition(
+            previous_state=CHECK_IF_ANY_HOURS_LEFT,
+            previous_character=bit_value,
+            next_state=final_state,
+            next_character=bit_value,
+            tape_pointer_direction=DO_NOT_MOVE,
+        )
+        for bit_value in ['0', '1']
+    )
 
     return transitions
 
