@@ -140,12 +140,6 @@ def copy_bits_to_end_of_output(initial_state, num_bits, final_state):
         else:
             return '{}Copy{}'.format(initial_state, bit_index)
 
-    def backtracking_state(bit_index):
-        if bit_index == num_bits - 1:
-            return final_state
-        else:
-            return '{}Backtracking{}'.format(initial_state, bit_index)
-
     def copy_bit(bit_index, bit_value):
         base_copying_state = '{}Bit{}'.format(state_name(bit_index + 1), bit_value)
 
