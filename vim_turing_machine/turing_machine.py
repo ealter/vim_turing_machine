@@ -120,6 +120,7 @@ class TuringMachine(object):
     def get_tape(self):
         return self._tape
 
+
 def validate_state_transitions(state_transitions):
     seen = defaultdict(list)
 

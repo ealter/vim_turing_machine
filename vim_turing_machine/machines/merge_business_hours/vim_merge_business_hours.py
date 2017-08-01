@@ -1,8 +1,8 @@
 import json
 import sys
 
-from vim_turing_machine.machines.merge_business_hours.merge_business_hours import MergeBusinessHoursGenerator
 from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
+from vim_turing_machine.machines.merge_business_hours.merge_business_hours import MergeBusinessHoursGenerator
 from vim_turing_machine.vim_machine import VimTuringMachine
 
 

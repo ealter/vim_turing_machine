@@ -2,6 +2,7 @@ from vim_turing_machine.constants import BACKWARDS
 from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import FORWARDS
 from vim_turing_machine.turing_machine import TuringMachine
+from vim_turing_machine.vim_constants import VIM_LOG_TAPE_AND_STATE
 from vim_turing_machine.vim_constants import VIM_MACHINE_FILENAME
 from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_BACKWARDS
 from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_FORWARDS
@@ -10,7 +11,6 @@ from vim_turing_machine.vim_constants import VIM_RUN_REGISTER
 from vim_turing_machine.vim_constants import VIM_TAPE_MAX_LENGTH
 from vim_turing_machine.vim_constants import VIM_TAPE_WRAP_POSITION
 from vim_turing_machine.vim_constants import VIM_TEMPLATE
-from vim_turing_machine.vim_constants import VIM_LOG_TAPE_AND_STATE
 
 
 def create_initial_tape(input_tape):
