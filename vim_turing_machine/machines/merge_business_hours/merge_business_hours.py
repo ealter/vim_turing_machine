@@ -93,23 +93,42 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # *** If we do not need to merge ***
-        #
-        # Things are super simple if we don't need to merge the hours. We just need
-        # to copy over the closing hours from the input array.
+        transitions.extend(
+            self.copy_closing_hour_without_merging(
+                initial_state=OPEN_HOUR_IS_GREATER_THAN,
+                final_state=CHECK_NEXT_SET_OF_HOURS,
+            )
+        )
+
+        transitions.extend(
+            self.copy_closing_hour_and_merge(
+                initial_state=OPEN_HOUR_IS_LESS_THAN,
+                final_state=CHECK_NEXT_SET_OF_HOURS,
+            )
+        )
+
+        return transitions
+
+    def copy_closing_hour_without_merging(self, initial_state, final_state):
+        """Things are super simple if we don't need to merge the hours. We just need
+        to copy over the closing hours from the input array.
+
+        Precondition: we are at the end of the output array. The opening hours
+            have already been copied. The opening hour is greater than the
+            previous pair's closing hour.
+        Postcondition: we are at the end of the output array
+        """
         COPY_CLOSING_HOUR_WITHOUT_MERGING = 'CopyClosingHourWithoutMerging'
 
         # First move back to the beginning of the input array since the copy
         # function requires that.
-        transitions.extend(
-            self.move_to_blank_spaces(
-                initial_state=OPEN_HOUR_IS_GREATER_THAN,
-                final_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
-                final_character=BLANK_CHARACTER,
-                final_direction=FORWARDS,
-                direction=BACKWARDS,
-                num_blanks=2,
-            )
+        transitions = self.move_to_blank_spaces(
+            initial_state=initial_state,
+            final_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
+            final_character=BLANK_CHARACTER,
+            final_direction=FORWARDS,
+            direction=BACKWARDS,
+            num_blanks=2,
         )
 
         # Then just copy the closing hour from the input array to the output array.
@@ -117,13 +136,20 @@ class MergeBusinessHoursGenerator(object):
             self.copy_bits_to_end_of_output(
                 initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
                 num_bits=self._num_bits,
-                final_state=CHECK_NEXT_SET_OF_HOURS,
+                final_state=final_state,
             )
         )
 
-        # *** If we do need to merge ***
-        #
-        # Constants for merging the hours
+        return transitions
+
+    def copy_closing_hour_and_merge(self, initial_state, final_state):
+        """Call this if you need to merge in the 2nd set of hours.
+
+        Precondition: we are at the end of the output array. The opening hours
+            have already been copied. The opening hour is less than or equal to
+            the previous pair's closing hour.
+        Postcondition: we are at the end of the output array
+        """
         MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
         COPY_OVER_CLOSING_HOUR = 'CopyClosingHour'
         COMPARE_CLOSING_HOUR = 'CompareClosingHour'
@@ -132,11 +158,9 @@ class MergeBusinessHoursGenerator(object):
 
         # If the opening hour is less than the closing hour of the previous pair,
         # then we discard that opening hour. So essentially, [2, 7, 5] becomes [2, 7].
-        transitions.extend(
-            self.erase_number(
-                initial_state=OPEN_HOUR_IS_LESS_THAN,
-                final_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
-            )
+        transitions = self.erase_number(
+            initial_state=initial_state,
+            final_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
         )
 
         # Move back to the beginning of the array.
@@ -174,7 +198,7 @@ class MergeBusinessHoursGenerator(object):
         transitions.extend(
             self.erase_number(
                 initial_state=CLOSING_HOUR_IS_NOT_LARGER,
-                final_state=CHECK_NEXT_SET_OF_HOURS,
+                final_state=final_state,
             )
         )
 
@@ -183,7 +207,7 @@ class MergeBusinessHoursGenerator(object):
         transitions.extend(
             self.replace_number(
                 initial_state=CLOSING_HOUR_IS_LARGER,
-                final_state=CHECK_NEXT_SET_OF_HOURS,
+                final_state=final_state,
             )
         )
 
