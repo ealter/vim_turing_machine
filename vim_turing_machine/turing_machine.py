@@ -40,6 +40,7 @@ class TuringMachine(object):
         self._tape = list(tape)[:]  # Copy the initial tape since we mutate it
         self._cursor_position = 0
         self._current_state = INITIAL_STATE
+        self._num_steps = 0
 
     def get_state_transition(self):
         try:
@@ -81,6 +82,12 @@ class TuringMachine(object):
 
     def final_state(self):
         print('Program complete. Final state: {}'.format(self._current_state))
+        print(
+            'The program completed in {} steps using a machine with {} transitions'.format(
+                self._num_steps,
+                len(self._state_transitions)
+            )
+        )
         self.print_tape()
         raise StopIteration
 
@@ -90,14 +97,12 @@ class TuringMachine(object):
         if self._debug:
             self.print_tape()
 
-        num_steps = 0
-
         try:
             while(True):
                 self.step()
-                num_steps += 1
+                self._num_steps += 1
 
-                if max_steps is not None and num_steps >= max_steps:
+                if max_steps is not None and self._num_steps >= max_steps:
                     raise TooManyStepsException
         except StopIteration:
             pass
