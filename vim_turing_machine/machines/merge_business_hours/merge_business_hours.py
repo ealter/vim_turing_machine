@@ -1,6 +1,6 @@
 """Our tape is defined in multiple segments, each separated by a blank character.
 
-<Blank>INPUT<Blank>OUTPUT
+INPUT<Blank>OUTPUT
 
 This program solves the "Merge Business Hours" interview question: Given a
 sorted list of possibly overlapping (opening, closing) hours, merge them.
@@ -33,26 +33,13 @@ class MergeBusinessHoursGenerator(object):
 
     def merge_business_hours_transitions(self):
         """This is the main orchestration point of the program"""
-        # The first character should be an empty space. Let's move until we hit
-        # a non-empty space. We need this empty space to exist so that we can
-        # later detect the beginning of the input.
-        transitions = [
-            StateTransition(
-                previous_state=INITIAL_STATE,
-                previous_character=BLANK_CHARACTER,
-                next_state=INITIAL_STATE,
-                next_character=BLANK_CHARACTER,
-                tape_pointer_direction=FORWARDS,
-            )
-        ]
-
         # This is the beginning of the loop that goes through the rest of the hours.
         CHECK_NEXT_SET_OF_HOURS = 'CheckNextSetOfHours'
 
         # We begin the program by copying the first hours pair into the output
         # array. At the end of this, the cursor will be at the end of the
         # output array.
-        transitions.extend(
+        transitions = list(
             self.copy_bits_to_end_of_output(
                 initial_state=INITIAL_STATE,
                 num_bits=self._num_bits * 2,
