@@ -25,7 +25,7 @@ class TooManyStepsException(Exception):
 
 class TuringMachine(object):
 
-    def __init__(self, state_transitions, debug=False):
+    def __init__(self, state_transitions, debug=False, quiet=False):
         validate_state_transitions(state_transitions)
 
         self._state_transitions = state_transitions
@@ -34,22 +34,23 @@ class TuringMachine(object):
             for state in state_transitions
         }
         self._debug = debug
+        self._quiet = quiet
         self.initialize_machine(tape=[])
 
-    def initialize_machine(self, tape):
-        self._tape = list(tape)[:]  # Copy the initial tape since we mutate it
-        self._cursor_position = 0
-        self._current_state = INITIAL_STATE
+    def initialize_machine(self, tape, initial_cursor_position=0):
+        self.tape = list(tape)[:]  # Copy the initial tape since we mutate it
+        self.cursor_position = initial_cursor_position
+        self.current_state = INITIAL_STATE
         self._num_steps = 0
 
     def get_state_transition(self):
         try:
             return self._state_transition_mapping[
-                (self._current_state, self._tape[self._cursor_position])
+                (self.current_state, self.tape[self.cursor_position])
             ]
         except KeyError:
             raise MissingStateTransition(
-                (self._current_state, self._tape[self._cursor_position])
+                (self.current_state, self.tape[self.cursor_position])
             )
 
     def step(self):
@@ -57,42 +58,44 @@ class TuringMachine(object):
         will error if you go beyond position 0"""
         transition = self.get_state_transition()
 
-        self._tape[self._cursor_position] = transition.next_character
+        self.tape[self.cursor_position] = transition.next_character
 
-        self._cursor_position += transition.tape_pointer_direction
+        self.cursor_position += transition.tape_pointer_direction
 
-        if self._cursor_position < 0:
+        if self.cursor_position < 0:
             raise NegativeTapePositionException
 
         # Make sure we haven't run more than 1 past the end of the tape. This
         # should never happen since we append to the tape over time.
-        assert self._cursor_position <= len(self._tape)
+        assert self.cursor_position <= len(self.tape)
 
-        if self._cursor_position >= len(self._tape):
+        if self.cursor_position >= len(self.tape):
             # Fake the infinite tape by adding a blank character under the
             # cursor.
-            self._tape.append(BLANK_CHARACTER)
+            self.tape.append(BLANK_CHARACTER)
 
-        self._current_state = transition.next_state
+        self.current_state = transition.next_state
 
-        if self._current_state in FINAL_STATES:
+        if self.current_state in FINAL_STATES:
             self.final_state()
         elif self._debug:
             self.print_tape()
 
     def final_state(self):
-        print('Program complete. Final state: {}'.format(self._current_state))
-        print(
-            'The program completed in {} steps using a machine with {} transitions'.format(
-                self._num_steps,
-                len(self._state_transitions)
+        if not self._quiet:
+            print('Program complete. Final state: {}'.format(self.current_state))
+            print(
+                'The program completed in {} steps using a machine with {} transitions'.format(
+                    self._num_steps,
+                    len(self._state_transitions)
+                )
             )
-        )
-        self.print_tape()
+            self.print_tape()
+
         raise StopIteration
 
-    def run(self, initial_tape, max_steps=None):
-        self.initialize_machine(initial_tape)
+    def run(self, initial_tape, max_steps=None, initial_cursor_position=0):
+        self.initialize_machine(initial_tape, initial_cursor_position=initial_cursor_position)
 
         if self._debug:
             self.print_tape()
@@ -109,21 +112,18 @@ class TuringMachine(object):
 
     def print_tape(self):
         tape = ''
-        for i, character in enumerate(self._tape):
-            if i == self._cursor_position:
+        for i, character in enumerate(self.tape):
+            if i == self.cursor_position:
                 tape += '{}{}{}{}'.format(colored.bg('red'), colored.fg('white'), character, colored.attr('reset'))
             else:
                 tape += character
 
-            if i != len(self._tape) - 1:
+            if i != len(self.tape) - 1:
                 tape += ' | '
 
         print(tape)
-        print('State: {}'.format(self._current_state))
+        print('State: {}'.format(self.current_state))
         print()  # Add empty line
-
-    def get_tape(self):
-        return self._tape
 
 
 def validate_state_transitions(state_transitions):
