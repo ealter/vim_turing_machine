@@ -200,22 +200,6 @@ class MergeBusinessHoursGenerator(object):
 
         return transitions
 
-    def invert_bit(self, bit_value):
-        if bit_value == '0':
-            return '1'
-        elif bit_value == '1':
-            return '0'
-        else:
-            raise AssertionError('Invalid bit {}'.format(bit_value))
-
-    def invert_direction(self, direction):
-        if direction == BACKWARDS:
-            return FORWARDS
-        elif direction == FORWARDS:
-            return BACKWARDS
-        else:
-            raise AssertionError('Invalid direction {}'.format(direction))
-
     def noop_when_non_blank(self, state, direction):
         return (
             StateTransition(
@@ -478,7 +462,7 @@ class MergeBusinessHoursGenerator(object):
                     # If the numbers are not equal
                     StateTransition(
                         previous_state=about_to_compare_bits_state(bit_index, bit_value),
-                        previous_character=self.invert_bit(bit_value),
+                        previous_character=invert_bit(bit_value),
                         next_state=(
                             FOUND_GREATER_THAN_OR_EQUAL_TO_STATE
                             if (
@@ -487,12 +471,12 @@ class MergeBusinessHoursGenerator(object):
                             )
                             else FOUND_LESS_THAN_STATE
                         ),
-                        next_character=self.invert_bit(bit_value),
-                        tape_pointer_direction=self.invert_direction(direction),
+                        next_character=invert_bit(bit_value),
+                        tape_pointer_direction=invert_direction(direction),
                     )
                 )
 
-            direction = self.invert_direction(direction)
+            direction = invert_direction(direction)
 
         # After we've determined the answer, we need to move to the end of the output array
         transitions.extend(
@@ -668,6 +652,24 @@ class MergeBusinessHoursGenerator(object):
         return transitions
 
 
+def invert_bit(bit_value):
+    if bit_value == '0':
+        return '1'
+    elif bit_value == '1':
+        return '0'
+    else:
+        raise AssertionError('Invalid bit {}'.format(bit_value))
+
+
+def invert_direction(direction):
+    if direction == BACKWARDS:
+        return FORWARDS
+    elif direction == FORWARDS:
+        return BACKWARDS
+    else:  # pragma: no cover
+        raise AssertionError('Invalid direction {}'.format(direction))
+
+
 if __name__ == '__main__':
     input_string = json.loads(sys.argv[1])
     num_bits = int(sys.argv[2])
@@ -678,4 +680,4 @@ if __name__ == '__main__':
     merge_business_hours = TuringMachine(gen.merge_business_hours_transitions(), debug=True)
     merge_business_hours.run(initial_tape=initial_tape, max_steps=5000)
 
-    print(decode_hours(''.join(merge_business_hours.get_tape()), num_bits))
+    print(decode_hours(''.join(merge_business_hours.tape), num_bits))
