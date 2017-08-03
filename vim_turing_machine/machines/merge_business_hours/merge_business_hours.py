@@ -236,11 +236,7 @@ class MergeBusinessHoursGenerator(object):
                     previous_character=bit_value,
                     next_state=state_name(bit_index + 1),
                     next_character=bit_value,
-                    tape_pointer_direction=(
-                        direction
-                        if bit_index < num_bits - 1
-                        else DO_NOT_MOVE
-                    ),
+                    tape_pointer_direction=direction,
                 )
                 for bit_index in range(num_bits)
             ]
@@ -414,7 +410,7 @@ class MergeBusinessHoursGenerator(object):
                 initial_state=initial_state,
                 direction=BACKWARDS,
                 final_state=about_to_read_first_bit_state(bit_index=0),
-                num_bits=self._num_bits,
+                num_bits=self._num_bits - 1,
             )
         )
 
@@ -441,7 +437,7 @@ class MergeBusinessHoursGenerator(object):
                         initial_state=already_have_one_bit_state(bit_index, bit_value),
                         direction=direction,
                         final_state=about_to_compare_bits_state(bit_index, bit_value),
-                        num_bits=self._num_bits,
+                        num_bits=self._num_bits - 1,
                     )
                 )
 
@@ -576,7 +572,7 @@ class MergeBusinessHoursGenerator(object):
                         initial_state=read_bit(bit_index, bit_value),
                         direction=BACKWARDS,
                         final_state=overwrite_bit(bit_index, bit_value),
-                        num_bits=self._num_bits,
+                        num_bits=self._num_bits - 1,
                     )
                 )
 

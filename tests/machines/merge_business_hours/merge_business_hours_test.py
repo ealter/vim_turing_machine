@@ -96,7 +96,7 @@ def test_move_n_bits(merger):
         assert_tape_not_changed=True,
     )
 
-    assert machine.cursor_position == 3
+    assert machine.cursor_position == 4
 
 
 def test_move_to_blank_spaces(merger):
