@@ -8,16 +8,14 @@ from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_BACKWARDS
 from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_FORWARDS
 from vim_turing_machine.vim_constants import VIM_NEXT_STATE
 from vim_turing_machine.vim_constants import VIM_RUN_REGISTER
-from vim_turing_machine.vim_constants import VIM_TAPE_MAX_LENGTH
 from vim_turing_machine.vim_constants import VIM_TAPE_WRAP_POSITION
 from vim_turing_machine.vim_constants import VIM_TEMPLATE
 
 
 def create_initial_tape(input_tape):
     """Generates the initial tape by padding the input and wrapping"""
-    padding_length = VIM_TAPE_MAX_LENGTH - len(input_tape)
-    if padding_length > 0:
-        input_tape += padding_length * [BLANK_CHARACTER]
+    padding_length = VIM_TAPE_WRAP_POSITION - len(input_tape) % VIM_TAPE_WRAP_POSITION
+    input_tape += padding_length * [BLANK_CHARACTER]
 
     initial_tape = []
     for index, value in enumerate(input_tape):
