@@ -72,8 +72,8 @@ class VimTuringMachine(TuringMachine):
 
         with open(VIM_MACHINE_FILENAME, 'w') as machine:
             machine.write(VIM_TEMPLATE.format(
-                initial_state=self._current_state,
-                initial_tape=create_initial_tape(self._tape),
+                initial_state=self.current_state,
+                initial_tape=create_initial_tape(self.tape),
                 logging=(
                     VIM_LOG_TAPE_AND_STATE if auto_step and self._debug else ''
                 ),

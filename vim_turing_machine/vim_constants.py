@@ -33,7 +33,7 @@ _t:  # Current tape
 {initial_tape}
 
 _n:  # Next state transition. Usage: `ny$@"
-{logging}`t"tyiw`ky$`s/_\V\("-t\|---\)\rf:ly$@"
+{logging}`t"tyiw`ky$`s/_"-t\|---\rf:ly$@"
 
 _p:  # Print state. Usage: `py$@"
 `ky$`op
