@@ -244,26 +244,27 @@ def test_copy_closing_hour_without_merging(merger):
     assert_tape(machine, '     000010110111')
 
 
-@pytest.mark.parametrize('initial_hours, final_hours',
-                         [
-                             (
-                                 [[0, 1]],
-                                 [[0, 1]],
-                             ),
-                             (
-                                 [[0, 1], [5, 6]],
-                                 [[0, 1], [5, 6]],
-                             ),
-                             (
-                                 [[0, 5], [2, 3]],
-                                 [[0, 5]],
-                             ),
-                             (
-                                 [[1, 3], [3, 4], [4, 5], [6, 7]],
-                                 [[1, 5], [6, 7]],
-                             )
-                         ]
-                         )
+@pytest.mark.parametrize(
+    'initial_hours, final_hours',
+    [
+        (
+            [[0, 1]],
+            [[0, 1]],
+        ),
+        (
+            [[0, 1], [5, 6]],
+            [[0, 1], [5, 6]],
+        ),
+        (
+            [[0, 5], [2, 3]],
+            [[0, 5]],
+        ),
+        (
+            [[1, 3], [3, 4], [4, 5], [6, 7]],
+            [[1, 5], [6, 7]],
+        )
+    ]
+)
 def test_merge_business_hours(merger, initial_hours, final_hours):
     """The true integration test!"""
     tape = encode_hours(initial_hours, num_bits=3)
