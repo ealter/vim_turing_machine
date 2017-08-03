@@ -8,6 +8,8 @@ import vim_turing_machine.turing_machine
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import NO_FINAL_STATE
 from vim_turing_machine.constants import YES_FINAL_STATE
+from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
+from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
 from vim_turing_machine.machines.merge_business_hours.merge_business_hours import invert_bit
 from vim_turing_machine.machines.merge_business_hours.merge_business_hours import invert_direction
 from vim_turing_machine.machines.merge_business_hours.merge_business_hours import MergeBusinessHoursGenerator
@@ -63,6 +65,14 @@ def assert_cursor_at_end_of_output(machine):
         end -= 1
 
     assert machine.cursor_position == end
+
+
+def assert_cursor_is_at_beginning_of_input(machine):
+    i = 0
+    while i < len(machine.tape) and machine.tape[i] == ' ':
+        i += 1
+
+    assert machine.cursor_position == i
 
 
 def assert_tape(machine, expected_tape):
@@ -163,3 +173,103 @@ def test_erase_number(merger):
 
     assert machine.cursor_position == 2
     assert_tape(machine, '100   110')
+
+
+def test_replace_number(merger):
+    tape = '100101110'
+
+    machine = run_machine(
+        merger.replace_number(
+            initial_state=INITIAL_STATE,
+            final_state=YES_FINAL_STATE,
+        ),
+        tape=tape,
+        initial_position=len(tape) - 1,
+    )
+
+    assert_tape(machine, '100110')
+    assert_cursor_at_end_of_output(machine)
+
+
+@pytest.mark.parametrize('tape, final_state', [
+    (' 100 101101', NO_FINAL_STATE),
+    ('  100101101', YES_FINAL_STATE),
+])
+def test_check_if_there_is_any_input_left(merger, tape, final_state):
+    machine = run_machine(
+        merger.check_if_there_is_any_input_left(
+            initial_state=INITIAL_STATE,
+            final_state=NO_FINAL_STATE,  # The machine exits with Yes if there is no input left.
+        ),
+        tape=tape,
+        initial_position=len(tape) - 1,
+        assert_tape_not_changed=True,
+    )
+
+    assert_cursor_is_at_beginning_of_input(machine)
+    assert machine.current_state == final_state
+
+
+@pytest.mark.parametrize('initial_tape, final_tape', [
+    (' 100 001010001', '     001100'),  # 2nd pair's closing hour is larger
+    (' 010 001110001', '     001110'),  # 2nd pair's closing hour is smaller
+    (' 110 001110001', '     001110'),  # 2nd pair's closing hour is equal
+])
+def test_copy_closing_hour_and_merge(merger, initial_tape, final_tape):
+    machine = run_machine(
+        merger.copy_closing_hour_and_merge(
+            initial_state=INITIAL_STATE,
+            final_state=YES_FINAL_STATE,
+        ),
+        tape=initial_tape,
+        initial_position=len(initial_tape) - 1,
+    )
+
+    assert_cursor_at_end_of_output(machine)
+    assert_tape(machine, final_tape)
+
+
+def test_copy_closing_hour_without_merging(merger):
+    tape = ' 111 000010110'
+    machine = run_machine(
+        merger.copy_closing_hour_without_merging(
+            initial_state=INITIAL_STATE,
+            final_state=YES_FINAL_STATE,
+        ),
+        tape=tape,
+        initial_position=len(tape) - 1,
+    )
+
+    assert_cursor_at_end_of_output(machine)
+    assert_tape(machine, '     000010110111')
+
+
+@pytest.mark.parametrize('initial_hours, final_hours',
+                         [
+                             (
+                                 [[0, 1]],
+                                 [[0, 1]],
+                             ),
+                             (
+                                 [[0, 1], [5, 6]],
+                                 [[0, 1], [5, 6]],
+                             ),
+                             (
+                                 [[0, 5], [2, 3]],
+                                 [[0, 5]],
+                             ),
+                             (
+                                 [[1, 3], [3, 4], [4, 5], [6, 7]],
+                                 [[1, 5], [6, 7]],
+                             )
+                         ]
+                         )
+def test_merge_business_hours(merger, initial_hours, final_hours):
+    """The true integration test!"""
+    tape = encode_hours(initial_hours, num_bits=3)
+    machine = run_machine(
+        merger.merge_business_hours_transitions(),
+        tape=tape,
+    )
+
+    assert final_hours == decode_hours(''.join(machine.tape), num_bits=3)
