@@ -74,13 +74,14 @@ class VimTuringMachine(TuringMachine):
             machine.write(VIM_TEMPLATE.format(
                 initial_state=self.current_state,
                 initial_tape=create_initial_tape(self.tape),
+                characters_per_line=VIM_TAPE_WRAP_POSITION,
                 logging=(
                     VIM_LOG_TAPE_AND_STATE if auto_step and self._debug else ''
                 ),
                 state_transitions='\n'.join(
                     VimStateTransitionAdapter(state_transition).to_vim()
                     for state_transition in self._state_transitions
-                )
+                ),
             ).replace(VIM_RUN_REGISTER, VIM_RUN_REGISTER if auto_step else ''))
 
         print('Machine written to {}'.format(VIM_MACHINE_FILENAME))
