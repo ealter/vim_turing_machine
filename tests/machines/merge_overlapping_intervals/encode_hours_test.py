@@ -1,7 +1,7 @@
 import pytest
 
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_in_x_bits
+from vim_turing_machine.machines.merge_overlapping_intervals.encode_hours import encode_hours
+from vim_turing_machine.machines.merge_overlapping_intervals.encode_hours import encode_in_x_bits
 
 
 @pytest.mark.parametrize('number, encoded', [

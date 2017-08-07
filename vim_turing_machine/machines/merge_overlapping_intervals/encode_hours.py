@@ -1,6 +1,6 @@
-"""Encodes a json representation of the business's hours into the 5-bit binary
-representation used by the merge business hours turing machine. It takes input
-from stdin and outputs the initial tape."""
+"""Encodes a json representation of the intervals into the 5-bit binary
+representation used by the merge overlapping intervals hours turing machine. It
+takes input from stdin and outputs the initial tape."""
 import json
 import sys
 

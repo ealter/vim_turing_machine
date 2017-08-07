@@ -18,8 +18,8 @@ from vim_turing_machine.constants import BLANK_CHARACTER
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import VALID_CHARACTERS
 from vim_turing_machine.constants import YES_FINAL_STATE
-from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
+from vim_turing_machine.machines.merge_overlapping_intervals.decode_hours import decode_hours
+from vim_turing_machine.machines.merge_overlapping_intervals.encode_hours import encode_hours
 from vim_turing_machine.struct import BACKWARDS
 from vim_turing_machine.struct import DO_NOT_MOVE
 from vim_turing_machine.struct import FORWARDS
@@ -31,7 +31,7 @@ class MergeBusinessHoursGenerator(object):
     def __init__(self, num_bits=BITS_PER_NUMBER):
         self._num_bits = num_bits
 
-    def merge_business_hours_transitions(self):
+    def merge_overlapping_intervals_transitions(self):
         """This is the main orchestration point of the program"""
         # This is the beginning of the loop that goes through the rest of the hours.
         CHECK_NEXT_SET_OF_HOURS = 'CheckNextSetOfHours'
@@ -673,7 +673,7 @@ if __name__ == '__main__':
     initial_tape = encode_hours(input_string, num_bits)
 
     gen = MergeBusinessHoursGenerator(num_bits)
-    merge_business_hours = TuringMachine(gen.merge_business_hours_transitions(), debug=True)
-    merge_business_hours.run(initial_tape=initial_tape, max_steps=5000)
+    merge_overlapping_intervals = TuringMachine(gen.merge_overlapping_intervals_transitions(), debug=True)
+    merge_overlapping_intervals.run(initial_tape=initial_tape, max_steps=5000)
 
-    print(decode_hours(''.join(merge_business_hours.tape), num_bits))
+    print(decode_hours(''.join(merge_overlapping_intervals.tape), num_bits))

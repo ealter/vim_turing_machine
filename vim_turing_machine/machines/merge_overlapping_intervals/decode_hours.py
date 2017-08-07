@@ -1,6 +1,6 @@
-"""Descodes a binary string to a json representation of the business's hours
-after the  merge business hours turing machine has processed it. Reads json from
-arv1 and outputs the initial tape."""
+"""Decodes a binary string to a json representation of the intervals
+after the merge overlapping intervals turing machine have processed them. Reads
+json from the command line and outputs the initial tape."""
 import json
 import sys
 
