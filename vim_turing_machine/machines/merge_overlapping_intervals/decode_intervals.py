@@ -8,15 +8,15 @@ from vim_turing_machine.constants import BITS_PER_NUMBER
 from vim_turing_machine.constants import BLANK_CHARACTER
 
 
-def decode_hours(hours, num_bits=BITS_PER_NUMBER):
+def decode_intervals(intervals, num_bits=BITS_PER_NUMBER):
     result = []
-    clean_hours = hours.replace(BLANK_CHARACTER, '').replace(' ', '')
+    clean_intervals = intervals.replace(BLANK_CHARACTER, '').replace(' ', '')
     index = 0
-    while index < len(clean_hours):
-        begin = clean_hours[index:index + num_bits]
+    while index < len(clean_intervals):
+        begin = clean_intervals[index:index + num_bits]
         begin = int(begin, 2)
         index += num_bits
-        end = clean_hours[index:index + num_bits]
+        end = clean_intervals[index:index + num_bits]
         end = int(end, 2)
         index += num_bits
         result.append([begin, end])
@@ -25,4 +25,4 @@ def decode_hours(hours, num_bits=BITS_PER_NUMBER):
 
 
 if __name__ == '__main__':
-    print(json.dumps(decode_hours(sys.argv[1], int(sys.argv[2]))))
+    print(json.dumps(decode_intervals(sys.argv[1], int(sys.argv[2]))))
