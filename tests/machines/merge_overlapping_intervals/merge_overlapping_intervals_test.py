@@ -12,7 +12,7 @@ from vim_turing_machine.machines.merge_overlapping_intervals.decode_intervals im
 from vim_turing_machine.machines.merge_overlapping_intervals.encode_intervals import encode_intervals
 from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import invert_bit
 from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import invert_direction
-from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import MergeBusinessHoursGenerator
+from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import MergeOverlappingIntervalsGenerator
 from vim_turing_machine.struct import BACKWARDS
 from vim_turing_machine.struct import FORWARDS
 from vim_turing_machine.turing_machine import TuringMachine
@@ -46,7 +46,7 @@ def mock_blank_character():
 
 @pytest.fixture
 def merger():
-    return MergeBusinessHoursGenerator(num_bits=3)
+    return MergeOverlappingIntervalsGenerator(num_bits=3)
 
 
 def run_machine(transitions, tape, initial_position=0, assert_tape_not_changed=False):
@@ -211,13 +211,13 @@ def test_check_if_there_is_any_input_left(merger, tape, final_state):
 
 
 @pytest.mark.parametrize('initial_tape, final_tape', [
-    (' 100 001010001', '     001100'),  # 2nd pair's closing hour is larger
-    (' 010 001110001', '     001110'),  # 2nd pair's closing hour is smaller
-    (' 110 001110001', '     001110'),  # 2nd pair's closing hour is equal
+    (' 100 001010001', '     001100'),  # 2nd pair's closing value is larger
+    (' 010 001110001', '     001110'),  # 2nd pair's closing value is smaller
+    (' 110 001110001', '     001110'),  # 2nd pair's closing value is equal
 ])
-def test_copy_closing_hour_and_merge(merger, initial_tape, final_tape):
+def test_copy_closing_value_and_merge(merger, initial_tape, final_tape):
     machine = run_machine(
-        merger.copy_closing_hour_and_merge(
+        merger.copy_closing_value_and_merge(
             initial_state=INITIAL_STATE,
             final_state=YES_FINAL_STATE,
         ),
@@ -229,10 +229,10 @@ def test_copy_closing_hour_and_merge(merger, initial_tape, final_tape):
     assert_tape(machine, final_tape)
 
 
-def test_copy_closing_hour_without_merging(merger):
+def test_copy_closing_value_without_merging(merger):
     tape = ' 111 000010110'
     machine = run_machine(
-        merger.copy_closing_hour_without_merging(
+        merger.copy_closing_value_without_merging(
             initial_state=INITIAL_STATE,
             final_state=YES_FINAL_STATE,
         ),

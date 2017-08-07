@@ -2,8 +2,8 @@
 
 INPUT<Blank>OUTPUT
 
-This program solves the "Merge Business Hours" interview question: Given a
-sorted list of possibly overlapping (opening, closing) intervals, merge them.
+This program solves the "Merge Overlapping Intervals" problem: Given a sorted
+list of possibly overlapping (opening, closing) intervals, merge them.
 
 Example: [[1, 5], [2, 3], [4, 6], [9, 11]] -> [[1, 6], [9, 11]]
 
@@ -27,7 +27,7 @@ from vim_turing_machine.struct import StateTransition
 from vim_turing_machine.turing_machine import TuringMachine
 
 
-class MergeBusinessHoursGenerator(object):
+class MergeOverlappingIntervalsGenerator(object):
     def __init__(self, num_bits=BITS_PER_NUMBER):
         self._num_bits = num_bits
 
@@ -81,14 +81,14 @@ class MergeBusinessHoursGenerator(object):
         )
 
         transitions.extend(
-            self.copy_closing_hour_without_merging(
+            self.copy_closing_value_without_merging(
                 initial_state=OPEN_HOUR_IS_GREATER_THAN,
                 final_state=CHECK_NEXT_SET_OF_HOURS,
             )
         )
 
         transitions.extend(
-            self.copy_closing_hour_and_merge(
+            self.copy_closing_value_and_merge(
                 initial_state=OPEN_HOUR_IS_LESS_THAN,
                 final_state=CHECK_NEXT_SET_OF_HOURS,
             )
@@ -96,13 +96,13 @@ class MergeBusinessHoursGenerator(object):
 
         return transitions
 
-    def copy_closing_hour_without_merging(self, initial_state, final_state):
+    def copy_closing_value_without_merging(self, initial_state, final_state):
         """Things are super simple if we don't need to merge the intervals. We just need
         to copy over the closing intervals from the input array.
 
         Precondition: we are at the end of the output array. The opening intervals
-            have already been copied. The opening hour is greater than the
-            previous pair's closing hour.
+            have already been copied. The opening value is greater than the
+            previous pair's closing value.
         Postcondition: we are at the end of the output array
         """
         COPY_CLOSING_HOUR_WITHOUT_MERGING = 'CopyClosingHourWithoutMerging'
@@ -118,7 +118,7 @@ class MergeBusinessHoursGenerator(object):
             num_blanks=2,
         )
 
-        # Then just copy the closing hour from the input array to the output array.
+        # Then just copy the closing value from the input array to the output array.
         transitions.extend(
             self.copy_bits_to_end_of_output(
                 initial_state=COPY_CLOSING_HOUR_WITHOUT_MERGING,
@@ -129,12 +129,12 @@ class MergeBusinessHoursGenerator(object):
 
         return transitions
 
-    def copy_closing_hour_and_merge(self, initial_state, final_state):
+    def copy_closing_value_and_merge(self, initial_state, final_state):
         """Call this if you need to merge in the 2nd set of intervals.
 
         Precondition: we are at the end of the output array. The opening intervals
-            have already been copied. The opening hour is less than or equal to
-            the previous pair's closing hour.
+            have already been copied. The opening value is less than or equal to
+            the previous pair's closing value.
         Postcondition: we are at the end of the output array
         """
         MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR = 'MoveToBeginningToCopyClosingHour'
@@ -143,8 +143,8 @@ class MergeBusinessHoursGenerator(object):
         CLOSING_HOUR_IS_LARGER = 'ClosingHourIsLarger'
         CLOSING_HOUR_IS_NOT_LARGER = 'ClosingHourIsNotLarger'
 
-        # If the opening hour is less than the closing hour of the previous pair,
-        # then we discard that opening hour. So essentially, [2, 7, 5] becomes [2, 7].
+        # If the opening value is less than the closing value of the previous pair,
+        # then we discard that opening value. So essentially, [2, 7, 5] becomes [2, 7].
         transitions = self.erase_number(
             initial_state=initial_state,
             final_state=MOVE_BACK_TO_BEGINNING_TO_COPY_CLOSING_HOUR,
@@ -162,7 +162,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # Now after erasing that number, we need to copy over the closing hour so
+        # Now after erasing that number, we need to copy over the closing value so
         # that we can merge it in.
         transitions.extend(
             self.copy_bits_to_end_of_output(
@@ -181,7 +181,7 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # If the closing hour is less than or equal to the previous closing hour, just nuke it.
+        # If the closing value is less than or equal to the previous closing value, just nuke it.
         transitions.extend(
             self.erase_number(
                 initial_state=CLOSING_HOUR_IS_NOT_LARGER,
@@ -189,8 +189,8 @@ class MergeBusinessHoursGenerator(object):
             )
         )
 
-        # But if the closing hour is greater than the previous closing hour, we
-        # should overwrite that closing hour with our larger value.
+        # But if the closing value is greater than the previous closing value, we
+        # should overwrite that closing value with our larger value.
         transitions.extend(
             self.replace_number(
                 initial_state=CLOSING_HOUR_IS_LARGER,
@@ -672,7 +672,7 @@ if __name__ == '__main__':
 
     initial_tape = encode_intervals(input_string, num_bits)
 
-    gen = MergeBusinessHoursGenerator(num_bits)
+    gen = MergeOverlappingIntervalsGenerator(num_bits)
     merge_overlapping_intervals = TuringMachine(gen.merge_overlapping_intervals_transitions(), debug=True)
     merge_overlapping_intervals.run(initial_tape=initial_tape, max_steps=5000)
 
