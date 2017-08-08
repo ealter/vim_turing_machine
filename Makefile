@@ -23,11 +23,11 @@ clean:
 
 .PHONY: run
 run: venv
-	venv/bin/python -m vim_turing_machine.machines.merge_business_hours.merge_business_hours '[[1,2],[2,3],[5,8]]' 5
+	venv/bin/python -m vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals '[[1,2],[2,3],[5,8]]' 5
 
 .PHONY: run-vim
 build-vim: venv
-	venv/bin/python -m vim_turing_machine.machines.merge_business_hours.vim_merge_business_hours '[[1,2],[2,3],[5,8]]' 5
+	venv/bin/python -m vim_turing_machine.machines.merge_overlapping_intervals.vim_merge_overlapping_intervals '[[1,2],[2,3],[5,8]]' 5
 
 open-vim-machine: build-vim
 	vim -u vimrc machine.vim

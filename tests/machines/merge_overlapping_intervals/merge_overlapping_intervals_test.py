@@ -2,17 +2,17 @@ from unittest import mock
 
 import pytest
 
-import vim_turing_machine.machines.merge_business_hours.merge_business_hours
+import vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals
 import vim_turing_machine.struct
 import vim_turing_machine.turing_machine
 from vim_turing_machine.constants import INITIAL_STATE
 from vim_turing_machine.constants import NO_FINAL_STATE
 from vim_turing_machine.constants import YES_FINAL_STATE
-from vim_turing_machine.machines.merge_business_hours.decode_hours import decode_hours
-from vim_turing_machine.machines.merge_business_hours.encode_hours import encode_hours
-from vim_turing_machine.machines.merge_business_hours.merge_business_hours import invert_bit
-from vim_turing_machine.machines.merge_business_hours.merge_business_hours import invert_direction
-from vim_turing_machine.machines.merge_business_hours.merge_business_hours import MergeBusinessHoursGenerator
+from vim_turing_machine.machines.merge_overlapping_intervals.decode_intervals import decode_intervals
+from vim_turing_machine.machines.merge_overlapping_intervals.encode_intervals import encode_intervals
+from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import invert_bit
+from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import invert_direction
+from vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals import MergeOverlappingIntervalsGenerator
 from vim_turing_machine.struct import BACKWARDS
 from vim_turing_machine.struct import FORWARDS
 from vim_turing_machine.turing_machine import TuringMachine
@@ -32,12 +32,12 @@ def mock_blank_character():
             ('0', '1', ' '),
         ):
             with mock.patch.object(
-                vim_turing_machine.machines.merge_business_hours.merge_business_hours,
+                vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals,
                 'BLANK_CHARACTER',
                 ' ',
             ):
                 with mock.patch.object(
-                    vim_turing_machine.machines.merge_business_hours.merge_business_hours,
+                    vim_turing_machine.machines.merge_overlapping_intervals.merge_overlapping_intervals,
                     'VALID_CHARACTERS',
                     ('0', '1', ' '),
                 ):
@@ -46,7 +46,7 @@ def mock_blank_character():
 
 @pytest.fixture
 def merger():
-    return MergeBusinessHoursGenerator(num_bits=3)
+    return MergeOverlappingIntervalsGenerator(num_bits=3)
 
 
 def run_machine(transitions, tape, initial_position=0, assert_tape_not_changed=False):
@@ -211,13 +211,13 @@ def test_check_if_there_is_any_input_left(merger, tape, final_state):
 
 
 @pytest.mark.parametrize('initial_tape, final_tape', [
-    (' 100 001010001', '     001100'),  # 2nd pair's closing hour is larger
-    (' 010 001110001', '     001110'),  # 2nd pair's closing hour is smaller
-    (' 110 001110001', '     001110'),  # 2nd pair's closing hour is equal
+    (' 100 001010001', '     001100'),  # 2nd pair's closing value is larger
+    (' 010 001110001', '     001110'),  # 2nd pair's closing value is smaller
+    (' 110 001110001', '     001110'),  # 2nd pair's closing value is equal
 ])
-def test_copy_closing_hour_and_merge(merger, initial_tape, final_tape):
+def test_copy_closing_value_and_merge(merger, initial_tape, final_tape):
     machine = run_machine(
-        merger.copy_closing_hour_and_merge(
+        merger.copy_closing_value_and_merge(
             initial_state=INITIAL_STATE,
             final_state=YES_FINAL_STATE,
         ),
@@ -229,10 +229,10 @@ def test_copy_closing_hour_and_merge(merger, initial_tape, final_tape):
     assert_tape(machine, final_tape)
 
 
-def test_copy_closing_hour_without_merging(merger):
+def test_copy_closing_value_without_merging(merger):
     tape = ' 111 000010110'
     machine = run_machine(
-        merger.copy_closing_hour_without_merging(
+        merger.copy_closing_value_without_merging(
             initial_state=INITIAL_STATE,
             final_state=YES_FINAL_STATE,
         ),
@@ -245,7 +245,7 @@ def test_copy_closing_hour_without_merging(merger):
 
 
 @pytest.mark.parametrize(
-    'initial_hours, final_hours',
+    'initial_intervals, final_intervals',
     [
         (
             [[0, 1]],
@@ -265,12 +265,12 @@ def test_copy_closing_hour_without_merging(merger):
         )
     ]
 )
-def test_merge_business_hours(merger, initial_hours, final_hours):
+def test_merge_overlapping_intervals(merger, initial_intervals, final_intervals):
     """The true integration test!"""
-    tape = encode_hours(initial_hours, num_bits=3)
+    tape = encode_intervals(initial_intervals, num_bits=3)
     machine = run_machine(
-        merger.merge_business_hours_transitions(),
+        merger.merge_overlapping_intervals_transitions(),
         tape=tape,
     )
 
-    assert final_hours == decode_hours(''.join(machine.tape), num_bits=3)
+    assert final_intervals == decode_intervals(''.join(machine.tape), num_bits=3)
