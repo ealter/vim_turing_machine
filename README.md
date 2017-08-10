@@ -12,7 +12,7 @@ its capabilities, we implemented a solution to the Merge Overlapping Intervals
 question and defined all the state transitions needed to solve this
 glorious problem. So next time you need to merge some intervals, don't
 hand-write a 10-line python program. Instead, take out your favorite editor and
-watch it solve the problem in less than a minute with 1500 state transitions!
+watch it solve the problem in less than a minute with 1400 state transitions!
 
 But a simple naysayer may say, 'We already have vimscript! Why in God's name
 would I want to use a Turing machine instead?' To that, we retort: our Turing
