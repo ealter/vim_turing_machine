@@ -13,5 +13,5 @@ if __name__ == '__main__':
     initial_tape = encode_intervals(input_string, num_bits)
 
     gen = MergeOverlappingIntervalsGenerator(num_bits)
-    merge_overlapping_intervals = VimTuringMachine(gen.merge_overlapping_intervals_transitions(), debug=True)
+    merge_overlapping_intervals = VimTuringMachine(gen.merge_overlapping_intervals_transitions(), debug=False)
     merge_overlapping_intervals.run(initial_tape=initial_tape)

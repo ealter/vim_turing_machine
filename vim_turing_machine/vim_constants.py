@@ -12,12 +12,29 @@ VIM_TAPE_WRAP_POSITION = 40
 
 VIM_LOG_TAPE_AND_STATE = '`ly$@"'
 
+
+def create_pointer(name, direction='j'):
+    """Creates a mark to a particular place on the tape."""
+    return '`h/_{name}:\rn{direction}m{name}'.format(name=name, direction=direction)
+
+
+VIM_POINTERS = ''.join([
+    create_pointer('t'),
+    create_pointer('l'),
+    create_pointer('k'),
+    create_pointer('o'),
+    create_pointer('p'),
+    create_pointer('s', direction=''),
+    create_pointer('n'),
+    create_pointer('e', direction='k'),
+])
+
 VIM_TEMPLATE = """0/_v1\rnf-ly$@"
 
 ### launch with ggyy@" ###
 
 # Init pointers
-_v1-gg0mh`h/_t\rnjmt`h/_l\rnjml`h/_k\rnjmk`h/_o\rnjmo`h/_p\rnjmp`h/_s\rnms`h/_n:\rnjmn`h/_e:\rnkme`ny$@"
+_v1-gg0mh{pointers}`ny$@"
 
 _o:  # Output
 

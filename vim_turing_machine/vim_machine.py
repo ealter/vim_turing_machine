@@ -7,6 +7,7 @@ from vim_turing_machine.vim_constants import VIM_MACHINE_FILENAME
 from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_BACKWARDS
 from vim_turing_machine.vim_constants import VIM_MOVE_TAPE_FORWARDS
 from vim_turing_machine.vim_constants import VIM_NEXT_STATE
+from vim_turing_machine.vim_constants import VIM_POINTERS
 from vim_turing_machine.vim_constants import VIM_RUN_REGISTER
 from vim_turing_machine.vim_constants import VIM_TAPE_WRAP_POSITION
 from vim_turing_machine.vim_constants import VIM_TEMPLATE
@@ -73,6 +74,7 @@ class VimTuringMachine(TuringMachine):
                 initial_state=self.current_state,
                 initial_tape=create_initial_tape(self.tape),
                 characters_per_line=VIM_TAPE_WRAP_POSITION,
+                pointers=VIM_POINTERS,
                 logging=(
                     VIM_LOG_TAPE_AND_STATE if auto_step and self._debug else ''
                 ),
