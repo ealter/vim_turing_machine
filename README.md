@@ -27,8 +27,10 @@ Given a set of sorted potentially overlapping open/close intervals, merge the
 overlapping intervals together.
 
 Example:
+```
 [[1, 5], [6, 7]] -> [[1, 5], [6, 7]]
 [[1, 5], [2, 3], [5, 7], [12, 15]] -> [[1, 7], [12, 15]]
+```
 
 To run this problem on a python Turing machine, just call `make run`. To run
 this problem on a Vim Turing machine, just call `make run-vim-machine`. To see
