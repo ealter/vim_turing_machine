@@ -35,6 +35,6 @@ this problem on a Vim Turing machine, just call `make run-vim-machine`. To see
 the Vim Turing machine without running it, call `make open-vim-machine`.
 
 Contributors
-=======
+============
 
 eliot and ifij wrote this project in July 2017 for Yelp's Hackathon 23.
