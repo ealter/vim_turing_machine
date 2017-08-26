@@ -101,6 +101,6 @@ Happy hacking!
 Contributors
 ============
 
-eliot and ifij wrote this project in July 2017 for Yelp's Hackathon 23.
+eliot and ifij wrote this project in July 2017 for Yelp's Hackathon 23. It was inspired by [vimmmex](https://github.com/xoreaxeaxeax/vimmmex): a Brainfuck interpretor written in Vim.
 
 [modeline]: # ( vim: set fenc=utf-8 spell spl=en textwidth=80: )
