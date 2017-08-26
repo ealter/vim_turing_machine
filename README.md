@@ -36,8 +36,8 @@ To run this problem on a python Turing machine, just call `make run`. To run
 this problem on a Vim Turing machine, just call `make run-vim-machine`. To see
 the Vim Turing machine without running it, call `make open-vim-machine`.
 
-So Vim did what? Wait. How does does it even?
-============================
+So Vim did what? Wait. How does it even?
+========================================
 
 So you run this program, and it works. Great! So what happened? Well the most
 common thing you're going to see is `y$@"`. What this does is yank from the
@@ -47,16 +47,15 @@ then chain lines together by ending lines with moving to a mark, or a search
 result, and then yanking and executing that line.
 
 Using that nifty trick, we begin by yanking the first line and executing it.
-That then sets off our mark initialization. We then jump to various markers in
-the file and then mark those positions using `m<letter>` where `<letter>` is
-whatever we want to call that mark. Generally the first initial of whatever the
-thing we're marking is. Once everything is marked, we then begin the state
-transitions.
+That then sets off our mark initialization. We then search for `_<someletter>`
+and then mark that position with the corresponding letter. Generally the first
+initial of whatever the thing we're marking is. Once everything is marked, we
+then begin the state transitions.
 
 We begin a state transition by executing a long command (located at `_n:`)
 which jumps to the tape marker, yanks it, then jumps to the current state
 marker, yanks that too, and then searches for some transition that contains both
-the state and tape value. Once it gets to that line, it jumps to the command
+the state and tape values. Once it gets to that line, it jumps to the command
 string and then executes our trusty `y$@"` to execute it. To make sure we keep
 transitioning, each state transition ends with `` `ny$@ `` which tells it to jump
 to our "next state" marker and then execute it again, which kicks off the search
@@ -77,8 +76,8 @@ The last real piece of complication is extending the tape. We're living in a
 world with unlimited tapes! What a time to be alive! This is done through a
 series of nifty hacks. First, we have a modeline that sets `whichwrap+b,s`. This
 allows us to move across line breaks and keep the tape all in the screen. Next,
-the line directly under the tape contains a "fake" value that , when added to
-our state search, will prevent it from matching any real state transitions and
+the line directly under the tape contains a "fake" value that, when added to our
+state search, will prevent it from matching any real state transitions and
 instead match a "transition" for adding a line to the tape. This line tells us
 to jump to the end of the tape, and then insert a full line of empty values (we
 use `X`), and then go back to our original tape location and execute the next
