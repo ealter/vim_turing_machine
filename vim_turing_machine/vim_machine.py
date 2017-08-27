@@ -75,6 +75,7 @@ class VimTuringMachine(TuringMachine):
                 initial_tape=create_initial_tape(self.tape),
                 characters_per_line=VIM_TAPE_WRAP_POSITION,
                 pointers=VIM_POINTERS,
+                blank_character=BLANK_CHARACTER,
                 logging=(
                     VIM_LOG_TAPE_AND_STATE if auto_step and self._debug else ''
                 ),

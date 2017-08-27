@@ -60,7 +60,7 @@ _s:  # State transitions
 {state_transitions}
 # End State transitions
 # Add an extra line to the end of the tape
-_--addlinetotape: `eO{characters_per_line}iX 0mt`ny$@"
+_--addlinetotape: `eO{characters_per_line}i{blank_character} 0mt`ny$@"
 
 # Print state when unknown transition
 _---: `py$@"
