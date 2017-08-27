@@ -32,9 +32,11 @@ Example:
 [[1, 5], [2, 3], [5, 7], [12, 15]] -> [[1, 7], [12, 15]]
 ```
 
-To run this problem on a python Turing machine, just call `make run`. To run
-this problem on a Vim Turing machine, just call `make run-vim-machine`. To see
-the Vim Turing machine without running it, call `make open-vim-machine`.
+Running the Python Turing Machine: `make run`
+
+Opening the Vim Turing Machine without running it: `make open-vim-machine`
+
+Opening and then running the Vim Turing Machine: `make run-vim-machine`
 
 So Vim did what? Wait. How does it even?
 ========================================
