@@ -6,8 +6,6 @@ setup(
     name='vim-turing-machine',
     version='1.0.0',
     classifiers=[
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
