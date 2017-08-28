@@ -38,7 +38,11 @@ class TuringMachine(object):
         self.initialize_machine(tape=[])
 
     def initialize_machine(self, tape, initial_cursor_position=0):
-        self.tape = list(tape)[:]  # Copy the initial tape since we mutate it
+        if tape:
+            self.tape = list(tape)[:]  # Copy the initial tape since we mutate it
+        else:
+            self.tape = [BLANK_CHARACTER]
+
         self.cursor_position = initial_cursor_position
         self.current_state = INITIAL_STATE
         self._num_steps = 0
