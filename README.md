@@ -100,6 +100,14 @@ it not to auto step and then step through manually using `y$@"`.
 
 Happy hacking!
 
+Dependencies
+============
+
+To run this code, you will need `python3.6`, `tox`, and `vim` installed on your
+machine. This code hasn't been tested on other versions of python3, but they'll
+probably work if you change the pinned version in `tox.ini`. This code is not
+python2 compatible.
+
 Contributors
 ============
 
