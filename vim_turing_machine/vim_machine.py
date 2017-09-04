@@ -66,7 +66,7 @@ class VimStateTransitionAdapter(object):
 class VimTuringMachine(TuringMachine):
 
     def run(self, initial_tape, auto_step=True):
-        """Genrates vim machine in an output file"""
+        """Generates vim machine in an output file"""
         self.initialize_machine(initial_tape)
 
         with open(VIM_MACHINE_FILENAME, 'w') as machine:
